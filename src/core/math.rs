@@ -1,0 +1,32 @@
+use std::fmt::{Formatter, Display};
+
+#[derive(Clone)]
+pub enum MathOperation {
+    Add,
+    Subtract,
+    Multiply
+}
+
+impl Display for MathOperation {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_char())
+    }
+}
+
+impl MathOperation {
+    pub fn as_char(&self) -> char {
+        match self {
+            MathOperation::Add => '+',
+            MathOperation::Subtract => '-',
+            MathOperation::Multiply => '*',
+        }
+    }
+
+    pub fn perform(&self, a: i64, b: i64) -> i64 {
+        match self {
+            MathOperation::Add => a + b,
+            MathOperation::Subtract => a - b,
+            MathOperation::Multiply => a * b
+        }
+    }
+}
