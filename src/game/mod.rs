@@ -1,5 +1,3 @@
-use crate::core::terminal::Terminal;
-
 pub mod mods;
 pub mod pastas;
 

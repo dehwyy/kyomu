@@ -2,8 +2,8 @@
 mod core;
 mod game;
 
-use core::terminal::{Terminal, StyledOutput, StyledInput, Color};
-use core::math::MathOperation;
+use core::io::{Terminal, styled::{StyledOutput, StyledInput}, Color};
+use core::math::operations::MathOperation;
 
 use game::Game;
 use game::mods::standard::{Standard, Difficulty};

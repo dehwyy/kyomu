@@ -1,4 +1,4 @@
-use std::fmt::{Formatter, Display};
+use std::fmt::{Formatter, Display, self};
 
 #[derive(Clone)]
 pub enum MathOperation {
@@ -8,7 +8,7 @@ pub enum MathOperation {
 }
 
 impl Display for MathOperation {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_char())
     }
 }

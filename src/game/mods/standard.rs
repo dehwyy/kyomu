@@ -4,8 +4,8 @@ use crossterm::style::Color;
 use eval::eval;
 
 use crate::core::random::Random;
-use crate::core::terminal::{StyledInput, StyledOutput, Terminal};
-use crate::core::math::MathOperation;
+use crate::core::io::{styled::{StyledInput, StyledOutput}, Terminal};
+use crate::core::math::operations::MathOperation;
 
 use crate::game::{Game, MaxGameLength};
 use crate::game::pastas::PUTIN;
