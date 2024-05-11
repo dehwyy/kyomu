@@ -1,6 +1,6 @@
 use std::fmt::{Formatter, Display, self};
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub enum MathOperation {
     Add,
     Subtract,

@@ -79,20 +79,32 @@ impl Terminal {
             .interact()
             .unwrap();
 
-        // this block works the same as in `select_one` fn
-        self.print(StyledOutput::new().with_text(prompt));
-        self.println(
-            StyledOutput::new()
-                .with_color(Color::Green)
-                // Example: {options: ["a", "b", "c"]; selected: [0, 2]} -> "a, c"
-                .with_text(
-                    selected_items.iter()
-                        .map(|idx| options[*idx].to_string())
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                )
-        );
+        // if anything was selected
+        if selected_items.len() != 0 {
+            // this block works the same as in `select_one` fn
+            self.print(StyledOutput::new().with_text(prompt));
+            self.println(
+                StyledOutput::new()
+                    .with_color(Color::Green)
+                    // Example: {options: ["a", "b", "c"]; selected: [0, 2]} -> "a, c"
+                    .with_text(
+                        selected_items.iter()
+                            .map(|idx| options[*idx].to_string())
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    )
+            );
+        }
 
+        selected_items
+    }
+
+    /// Returns all selected options' indexes (at least one item must be selected)
+    pub fn select_multiple_at_least_one<ToStr: ToString>(&mut self, prompt: &str, options: &Vec<ToStr>) -> Vec<usize> {
+        let mut selected_items = vec!();
+        while selected_items.len() == 0 {
+            selected_items = self.select_multiple(prompt, options)
+        }
 
         selected_items
     }

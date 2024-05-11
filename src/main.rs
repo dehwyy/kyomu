@@ -53,10 +53,10 @@ fn standard(mut t: Terminal) -> impl Game {
     };
 
     let operations = vec!(MathOperation::Add, MathOperation::Subtract);
-    let selected_operations = t.select_multiple("Mathematical operations: ", &operations)
-        .iter()
-        .map(|idx| operations[*idx].clone())
-        .collect::<Vec<_>>();
+    let selected_operations = t.select_multiple_at_least_one("Mathematical operations: ", &operations)
+            .iter()
+            .map(|idx| operations[*idx])
+            .collect::<Vec<_>>();
 
 
     Standard::new(difficulty, selected_operations, t)
