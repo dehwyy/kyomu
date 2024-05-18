@@ -7,7 +7,7 @@ use crate::core::random::Random;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Terminal};
 use crate::core::math::operations::MathOperation;
 
-use crate::game::{Game, MaxGameLength};
+use crate::game::{Stage, MaxGameLength};
 use crate::game::pastas::PUTIN;
 
 type Range = StdRange<i64>;
@@ -115,11 +115,12 @@ impl Standard {
     }
 }
 
-impl Game for Standard {
-    fn start(mut self) {
+impl Stage for Standard {
+    fn enter(mut self) {
+        
         // well, it means `right` or `correct`
         let mut 正 = 0;
-
+        
         for _ in 0..self.difficulty_info.stages {
            if self.print() {
                正 += 1;

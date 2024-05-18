@@ -184,6 +184,8 @@ dependencies = [
  "eval",
  "rand",
  "redb",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 

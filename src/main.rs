@@ -5,7 +5,7 @@ mod game;
 use core::io::{Terminal, styled::{StyledOutput, StyledInput}, Color};
 use core::math::operations::MathOperation;
 
-use game::Game;
+use game::Stage;
 use game::mods::standard::{Standard, Difficulty};
 
 
@@ -27,7 +27,14 @@ fn main() {
         }))
     ).unwrap();
 
-    let name = input_value.to_string();
+    let _ = input_value.to_string();
+
+    let paths = vec!["Play games", "Go to settings", "Exit"];
+    let stage= match t.select_one("What do you want to do?: ", &paths) {
+        0 => {}, // Play games
+        1 => {}, // Settings
+        _ => return, // Exit on `2` or and invalid input
+    };
 
     let modes = vec!["Standard"];
     let play_mode = t.select_one("Play mode: ", &modes);
@@ -37,13 +44,13 @@ fn main() {
         _ => standard(t),
     };
 
-    game.start();
+    game.enter();
 
     // Clear terminal bytes sequence
     // print!("\x1B[2J\x1B[1;1H");
 }
 
-fn standard(mut t: Terminal) -> impl Game {
+fn standard(mut t: Terminal) -> impl Stage {
     let difficulties = vec!("Easy", "Hard");
 
     let difficulty = match t.select_one("Difficulty: ", &difficulties) {
