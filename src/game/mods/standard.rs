@@ -6,7 +6,7 @@ use crate::core::random::Random;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Terminal};
 use crate::core::math::operations::MathOperation;
 
-use crate::game::{Stage, MaxGameLength};
+use crate::game::{Scenary, ScenaryWithResults, MaxGameLength};
 use crate::game::pastas::{PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON};
 
 type Range = StdRange<i64>;
@@ -69,16 +69,16 @@ impl<const N: usize, const OP: usize> Seed<N, OP> {
     }
 }
 
-pub struct Standard {
+pub struct Standard<'a> {
     difficulty_info: DifficultyInfo,
-    terminal: Terminal
+    t: &'a mut Terminal
 }
 
-impl Standard {
-    fn new(difficulty: Difficulty, operations: Vec<MathOperation>, terminal: Terminal) -> Self {
+impl<'a> Standard<'a> {
+    pub fn new(difficulty: Difficulty, operations: Vec<MathOperation>, t: &'a mut Terminal) -> Self {
         Self {
             difficulty_info: DifficultyInfo::new(difficulty, operations),
-            terminal
+            t
         }
     }
 
@@ -91,7 +91,7 @@ impl Standard {
         let eq = seed.to_string();
         let result = seed.get_result();
 
-        let v = self.terminal.input(
+        let v = self.t.input(
             StyledOutput::new()
                 .with_text(format!("{eq}: "))
                 .with_color(Color::Cyan),
@@ -114,26 +114,8 @@ impl Standard {
     }
 }
 
-impl Stage for Standard {
-    fn init(mut t: Terminal) -> Self {
-        let difficulties = vec!("Easy", "Hard");
-
-        let difficulty = match t.select_one("Difficulty: ", &difficulties) {
-            0 => Difficulty::Easy,
-            1 => Difficulty::Hard,
-            _ => Difficulty::Easy,
-        };
-
-        let operations = vec!(MathOperation::Add, MathOperation::Subtract);
-        let selected_operations = t.select_multiple_at_least_one("Mathematical operations: ", &operations)
-                .iter()
-                .map(|idx| operations[*idx])
-                .collect::<Vec<_>>();
-
-        Standard::new(difficulty, selected_operations, t)
-    }
-
-    fn enter(mut self) -> Terminal {
+impl Scenary for Standard<'_> {
+    fn start(mut self) -> Self {
 
         // well, it means `right` or `correct`
         let mut 正 = 0;
@@ -150,12 +132,20 @@ impl Stage for Standard {
             false => Random::peak(vec!("Good job!", "Nice!", "Not bad!")),
         };
 
-        self.terminal.println(
+        self.t.println(
             StyledOutput::new()
-                .with_text(outro_message[0])
+                .with_text(format!("{}\n", outro_message[0]))
                 .with_color(Color::Magenta)
         );
 
-        self.terminal
+        self
     }
+}
+
+impl ScenaryWithResults for Standard<'_> {
+    fn get_result(self) -> i32{
+        // TODO
+        1i32
+    }
+    fn next(self) {}
 }

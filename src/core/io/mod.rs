@@ -100,7 +100,7 @@ impl Terminal {
     }
 
     /// Returns all selected options' indexes (at least one item must be selected)
-    pub fn select_multiple_at_least_one<ToStr: ToString>(&mut self, prompt: &str, options: &Vec<ToStr>) -> Vec<usize> {
+    pub fn select_multiple_at_least_one<S: ToString>(&mut self, prompt: &str, options: &Vec<S>) -> Vec<usize> {
         let mut selected_items = vec!();
         while selected_items.len() == 0 {
             selected_items = self.select_multiple(prompt, options)

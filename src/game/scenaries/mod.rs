@@ -1,8 +1,11 @@
+pub mod game_prepare;
+
+use game_prepare::PrepareGameScenries;
+
 use crate::core::io::Terminal;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Color};
 
-use crate::game::Stage;
-use crate::game::mods::Standard;
+use crate::game::{Scenary, ScenaryWithResults};
 
 pub struct Scenries {
   t: Terminal
@@ -51,19 +54,22 @@ impl Scenries {
     };
   }
 
-  fn games(mut self) -> Self {
+  fn games(mut self) {
     // 1. Standard
     // 2. Snake (PLANNING)
     let modes = vec!["Standard"];
 
-    let t = match self.t.select_one("Play mode: ", &modes) {
-        _ => Standard::init(self.t).enter()
+    let game_scenary = match self.t.select_one("Play mode: ", &modes) {
+        _ => PrepareGameScenries::standart(&mut self.t)
     };
 
-    Self { t }
+    let _ = game_scenary.start().get_result();
+
+    // after game end -> return to menu
+    self.menu()
   }
 
-  fn settings(self) -> Self {
+  fn settings(self) {
     todo!()
   }
 }
