@@ -92,8 +92,8 @@ impl Scenarios {
           let flag = SettingScenarios::clear_line_after_action(&mut self.t);
           self.t.update_settings(TerminalSettings::new().set_clear_line_after_action(flag));
         },
-        _ => return
-    }
+        _ => {}
+    };
 
     self.menu();
   }
