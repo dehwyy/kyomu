@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use std::ops::Range as StdRange;
 use crossterm::style::Color;
 use eval::eval;
@@ -8,7 +7,7 @@ use crate::core::io::{styled::{StyledInput, StyledOutput}, Terminal};
 use crate::core::math::operations::MathOperation;
 
 use crate::game::{Stage, MaxGameLength};
-use crate::game::pastas::PUTIN;
+use crate::game::pastas::{PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON};
 
 type Range = StdRange<i64>;
 
@@ -76,7 +75,7 @@ pub struct Standard {
 }
 
 impl Standard {
-    pub fn new(difficulty: Difficulty, operations: Vec<MathOperation>, terminal: Terminal) -> Self {
+    fn new(difficulty: Difficulty, operations: Vec<MathOperation>, terminal: Terminal) -> Self {
         Self {
             difficulty_info: DifficultyInfo::new(difficulty, operations),
             terminal
@@ -116,11 +115,29 @@ impl Standard {
 }
 
 impl Stage for Standard {
-    fn enter(mut self) {
-        
+    fn init(mut t: Terminal) -> Self {
+        let difficulties = vec!("Easy", "Hard");
+
+        let difficulty = match t.select_one("Difficulty: ", &difficulties) {
+            0 => Difficulty::Easy,
+            1 => Difficulty::Hard,
+            _ => Difficulty::Easy,
+        };
+
+        let operations = vec!(MathOperation::Add, MathOperation::Subtract);
+        let selected_operations = t.select_multiple_at_least_one("Mathematical operations: ", &operations)
+                .iter()
+                .map(|idx| operations[*idx])
+                .collect::<Vec<_>>();
+
+        Standard::new(difficulty, selected_operations, t)
+    }
+
+    fn enter(mut self) -> Terminal {
+
         // well, it means `right` or `correct`
         let mut 正 = 0;
-        
+
         for _ in 0..self.difficulty_info.stages {
            if self.print() {
                正 += 1;
@@ -129,7 +146,7 @@ impl Stage for Standard {
 
         // `Type` may seem a bit weird, but `Random::peak` fn uses `const generic` to manipulate the number of returned values
         let outro_message: [&str; 1] = match 正 == self.difficulty_info.stages {
-            true => Random::peak(vec!(PUTIN)),
+            true => Random::peak(vec!(PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON)),
             false => Random::peak(vec!("Good job!", "Nice!", "Not bad!")),
         };
 
@@ -137,6 +154,8 @@ impl Stage for Standard {
             StyledOutput::new()
                 .with_text(outro_message[0])
                 .with_color(Color::Magenta)
-        )
+        );
+
+        self.terminal
     }
 }

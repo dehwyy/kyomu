@@ -1,3 +1,3 @@
-pub struct GameMod;
-
 pub mod standard;
+
+pub use standard::Standard;
