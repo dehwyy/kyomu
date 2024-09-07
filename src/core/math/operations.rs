@@ -13,6 +13,12 @@ impl Display for MathOperation {
     }
 }
 
+impl Default for MathOperation {
+    fn default() -> Self {
+        MathOperation::Add
+    }
+}
+
 impl MathOperation {
     pub fn as_char(&self) -> char {
         match self {
