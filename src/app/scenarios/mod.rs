@@ -1,7 +1,10 @@
 pub mod game;
+pub mod settings;
 
 use game::GameScenarios;
+use settings::SettingScenarios;
 
+use crate::core::io::terminal::TerminalSettings;
 use crate::core::io::Terminal;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Color};
 
@@ -45,7 +48,7 @@ impl Scenarios {
     // 2. Exit
     let options = vec!["Play games", "Go to settings", "Exit"];
 
-    match self.t.select_one("What do you want to do?: ", &options) {
+    match self.t.select_one("What do you want to do?: ", &options, 0) {
         0 => self.games(),    // Play games
         1 => self.settings(), // Settings TODO
         _ => return,          // Exit on `2` or and invalid input
@@ -57,7 +60,7 @@ impl Scenarios {
     // 2. Snake (PLANNING)
     let modes = vec!["Standard"];
 
-    let game_scenario = match self.t.select_one("Play mode: ", &modes) {
+    let game_scenario = match self.t.select_one("Play mode: ", &modes, 0) {
         _ => GameScenarios::standart(&mut self.t)
     };
 
@@ -72,13 +75,23 @@ impl Scenarios {
     // 0.2 main color?
     // 0. displayed name
     // 1. funny pastas
-    // 2. exit
+    // 2. display history
+    // 3. exit
     let displayed_name = format!("Displayed name: {} (change)", &self.name);
-    let options: Vec<&str> = vec![&displayed_name, "Funny pastas", "Exit"];
+    let options: Vec<&str> = vec![&displayed_name, "Funny pastas", "Display history", "Exit"];
 
-    match self.t.select_one("Settings: ", &options) {
-        0 => {},
-        1 => {},
+    match self.t.select_one("Settings: ", &options, 0) {
+        0 => {
+          self.name = SettingScenarios::change_name(&mut self.t);
+        },
+        1 => {
+          let flag = SettingScenarios::use_funny_pastas(&mut self.t);
+          self.t.update_settings(TerminalSettings::new().set_funny_pastas(flag));
+        },
+        2 => {
+          let flag = SettingScenarios::clear_line_after_action(&mut self.t);
+          self.t.update_settings(TerminalSettings::new().set_clear_line_after_action(flag));
+        },
         _ => return
     }
 

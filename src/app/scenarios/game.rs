@@ -13,7 +13,7 @@ impl GameScenarios {
 
     let difficulties = vec!("Easy", "Hard");
 
-    let difficulty = match t.select_one("Difficulty: ", &difficulties) {
+    let difficulty = match t.select_one("Difficulty: ", &difficulties, 0) {
           0 => Difficulty::Easy,
           1 => Difficulty::Hard,
           _ => Difficulty::Easy,

@@ -126,8 +126,9 @@ impl Scenario for Standard<'_> {
            }
         }
 
+        // ALl answers are right AND funny pastas are enabled -> use them : use common words
         // `Type` may seem a bit weird, but `Random::peak` fn uses `const generic` to manipulate the number of returned values
-        let outro_message: [&str; 1] = match 正 == self.difficulty_info.stages {
+        let outro_message: [&str; 1] = match 正 == self.difficulty_info.stages && self.t.get_settings().funny_pastas {
             true => Random::peak(vec!(PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON)),
             false => Random::peak(vec!("Good job!", "Nice!", "Not bad!")),
         };

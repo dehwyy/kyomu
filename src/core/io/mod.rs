@@ -1,4 +1,5 @@
 mod input;
+pub mod terminal;
 pub mod styled;
 
 use std::io::{self, Stdout};
@@ -16,13 +17,15 @@ use crate::input;
 
 pub use crossterm::style::Color;
 pub struct Terminal {
-    stdout: Stdout
+    stdout: Stdout,
+    settings: terminal::TerminalSettings
 }
 
 impl Terminal {
     pub fn new() -> Self {
         Self {
-            stdout: io::stdout()
+            stdout: io::stdout(),
+            settings: terminal::TerminalSettings::default()
         }
     }
 
@@ -47,25 +50,29 @@ impl Terminal {
     }
 
     /// Returns index of selected option
-    pub fn select_one<ToStr: ToString>(&mut self, prompt: &str, options: &Vec<ToStr>) -> usize {
+    pub fn select_one<ToStr: ToString>(&mut self, prompt: &str, options: &Vec<ToStr>, default_val: usize) -> usize {
         let select_item = Select::with_theme(&ColorfulTheme::default())
             .with_prompt(prompt)
             .items(options)
             .report(false)
-            .default(0)
+            .default(default_val)
             .interact()
             .unwrap();
 
-        // Print prompt once again, as after `selection` it will be cleared
-        // Print without `\n`
-        self.print(StyledOutput::new().with_text(prompt));
+        // If `clear_line_after_action` is disabled
+        if !self.settings.clear_line_after_action {
+            // Print prompt once again, as after `selection` it will be cleared
+            // Print without `\n`
+            self.print(StyledOutput::new().with_text(prompt));
 
-        // Print selected option (would be concatenated to the end of the prompt)
-        self.println(
-            StyledOutput::new()
-                .with_text(options[select_item].to_string())
-                .with_color(Color::Green)
-        );
+            // Print selected option (would be concatenated to the end of the prompt)
+            self.println(
+                StyledOutput::new()
+                    .with_text(options[select_item].to_string())
+                    .with_color(Color::Green)
+            );
+        }
+
 
         select_item
     }
@@ -79,8 +86,8 @@ impl Terminal {
             .interact()
             .unwrap();
 
-        // if anything was selected
-        if selected_items.len() != 0 {
+        // if anything was selected AND `clear_line_after_action` is disabled
+        if selected_items.len() != 0 && !self.settings.clear_line_after_action {
             // this block works the same as in `select_one` fn
             self.print(StyledOutput::new().with_text(prompt));
             self.println(
@@ -107,6 +114,14 @@ impl Terminal {
         }
 
         selected_items
+    }
+
+    pub fn update_settings(&mut self, settings: terminal::TerminalSettings) {
+        self.settings = settings;
+    }
+
+    pub fn get_settings(&self) -> terminal::TerminalSettings {
+        self.settings
     }
 
     fn clear_line(&mut self) -> &mut Stdout {
