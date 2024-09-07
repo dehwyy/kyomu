@@ -1,12 +1,12 @@
 
 mod core;
-mod game;
+mod app;
 
-use game::scenaries::Scenries;
+use app::scenarios::Scenarios;
 
 
 fn main() {
-    Scenries::welcome().menu();
+    Scenarios::welcome().menu();
     // Clear terminal bytes sequence
     // print!("\x1B[2J\x1B[1;1H");
 }

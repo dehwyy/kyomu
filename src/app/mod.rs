@@ -1,5 +1,5 @@
 pub mod mods;
-pub mod scenaries;
+pub mod scenarios;
 pub mod pastas;
 
 mod settings;
@@ -7,12 +7,12 @@ mod settings;
 // maybe u8 is better here
 pub type MaxGameLength = u16;
 
-/// `Scenary` may be either `Game` or `Settings` (something that can be selected and started)
-pub trait Scenary {
+/// `Scenario` may be either `Game` or `Settings` (something that can be selected and started)
+pub trait Scenario {
     fn start(self) -> Self;
 }
 
-pub trait ScenaryWithResults: Scenary {
+pub trait ScenarioWithResults: Scenario {
     fn get_result(self) -> i32;
     fn next(self);
 }

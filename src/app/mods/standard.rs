@@ -6,8 +6,8 @@ use crate::core::random::Random;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Terminal};
 use crate::core::math::operations::MathOperation;
 
-use crate::game::{Scenary, ScenaryWithResults, MaxGameLength};
-use crate::game::pastas::{PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON};
+use crate::app::{Scenario, ScenarioWithResults, MaxGameLength};
+use crate::app::pastas::{PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON};
 
 type Range = StdRange<i64>;
 
@@ -114,7 +114,7 @@ impl<'a> Standard<'a> {
     }
 }
 
-impl Scenary for Standard<'_> {
+impl Scenario for Standard<'_> {
     fn start(mut self) -> Self {
 
         // well, it means `right` or `correct`
@@ -142,7 +142,7 @@ impl Scenary for Standard<'_> {
     }
 }
 
-impl ScenaryWithResults for Standard<'_> {
+impl ScenarioWithResults for Standard<'_> {
     fn get_result(self) -> i32{
         // TODO
         1i32

@@ -1,14 +1,14 @@
 use crate::core::io::Terminal;
 use crate::core::math::MathOperation;
 
-use crate::game::ScenaryWithResults;
+use crate::app::ScenarioWithResults;
 
-use crate::game::mods::standard;
+use crate::app::mods::standard;
 
-pub struct PrepareGameScenries;
+pub struct GameScenarios;
 
-impl PrepareGameScenries {
-  pub fn standart(t: &mut Terminal) -> impl ScenaryWithResults + '_ {
+impl GameScenarios {
+  pub fn standart(t: &mut Terminal) -> impl ScenarioWithResults + '_ {
     use standard::{Difficulty, Standard};
 
     let difficulties = vec!("Easy", "Hard");

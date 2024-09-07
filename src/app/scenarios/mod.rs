@@ -1,18 +1,19 @@
-pub mod game_prepare;
+pub mod game;
 
-use game_prepare::PrepareGameScenries;
+use game::GameScenarios;
 
 use crate::core::io::Terminal;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Color};
 
-use crate::game::{Scenary, ScenaryWithResults};
+use crate::app::{Scenario, ScenarioWithResults};
 
-pub struct Scenries {
+pub struct Scenarios {
+  name: String,
   t: Terminal
 }
 
-impl Scenries {
-  /// Start scenary
+impl Scenarios {
+  /// Start scenario
   pub fn welcome() -> Self {
     // create `terminal` instance`
     let mut t = Terminal::new();
@@ -32,19 +33,16 @@ impl Scenries {
       Some(StyledInput::new(|input| {
           StyledOutput::new().with_text(format!("Hello, {}!\n", input.to_string().trim()))
       }))
-    ).unwrap();
+    ).unwrap().to_string();
 
-    // Check saved presets
-    let _ = name.to_string();
-
-    Self { t }
+    Self { t, name }
   }
 
-  /// End scenary
+  /// End scenario
   pub fn menu(mut self) {
-    // 1. Games
-    // 2. Settings
-    // 3. Exit
+    // 0. Games
+    // 1. Settings
+    // 2. Exit
     let options = vec!["Play games", "Go to settings", "Exit"];
 
     match self.t.select_one("What do you want to do?: ", &options) {
@@ -59,17 +57,31 @@ impl Scenries {
     // 2. Snake (PLANNING)
     let modes = vec!["Standard"];
 
-    let game_scenary = match self.t.select_one("Play mode: ", &modes) {
-        _ => PrepareGameScenries::standart(&mut self.t)
+    let game_scenario = match self.t.select_one("Play mode: ", &modes) {
+        _ => GameScenarios::standart(&mut self.t)
     };
 
-    let _ = game_scenary.start().get_result();
+    let _ = game_scenario.start().get_result();
 
     // after game end -> return to menu
     self.menu()
   }
 
-  fn settings(self) {
-    todo!()
+  fn settings(mut self) {
+    // 0.1. filter??
+    // 0.2 main color?
+    // 0. displayed name
+    // 1. funny pastas
+    // 2. exit
+    let displayed_name = format!("Displayed name: {} (change)", &self.name);
+    let options: Vec<&str> = vec![&displayed_name, "Funny pastas", "Exit"];
+
+    match self.t.select_one("Settings: ", &options) {
+        0 => {},
+        1 => {},
+        _ => return
+    }
+
+    self.menu();
   }
 }
