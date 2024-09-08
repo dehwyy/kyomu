@@ -1,14 +1,13 @@
 use crate::core::io::Terminal;
 use crate::core::math::MathOperation;
 
-use crate::app::ScenarioWithResults;
-
-use crate::app::mods::standard;
+use crate::app::Scenario;
+use crate::app::mods::{standard, snake};
 
 pub struct GameScenarios;
 
 impl GameScenarios {
-  pub fn standart(t: &mut Terminal) -> impl ScenarioWithResults + '_ {
+  pub fn standart(t: &mut Terminal) -> Box<dyn Scenario + '_> {
     use standard::{Difficulty, Standard};
 
     let difficulties = vec!("Easy", "Hard");
@@ -25,6 +24,11 @@ impl GameScenarios {
               .map(|idx| operations[*idx])
               .collect::<Vec<_>>();
 
-    Standard::new(difficulty, selected_operations, t)
+    Box::new(Standard::new(difficulty, selected_operations, t))
+  }
+
+  pub fn snake(t: &mut Terminal) -> Box<dyn Scenario + '_> {
+    use snake::SnakeGame;
+    Box::new(SnakeGame::new(t))
   }
 }

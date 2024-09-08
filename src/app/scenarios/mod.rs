@@ -8,7 +8,7 @@ use crate::core::io::terminal::TerminalSettings;
 use crate::core::io::Terminal;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Color};
 
-use crate::app::{Scenario, ScenarioWithResults};
+use crate::app::Scenario;
 
 pub struct Scenarios {
   name: String,
@@ -57,14 +57,19 @@ impl Scenarios {
 
   fn games(mut self) {
     // 1. Standard
-    // 2. Snake (PLANNING)
-    let modes = vec!["Standard"];
+    // 2. Snake
+    let modes = vec!["Snake", "Standard"];
 
-    let game_scenario = match self.t.select_one("Play mode: ", &modes, 0) {
-        _ => GameScenarios::standart(&mut self.t)
+    let mut game_scenario = match self.t.select_one("Play mode: ", &modes, 0) {
+        0 => GameScenarios::snake(&mut self.t),
+        1_usize.. => GameScenarios::standart(&mut self.t)
     };
 
-    let _ = game_scenario.start().get_result();
+    // TODO
+    let _res = game_scenario.start();
+
+    // Free momory of Box Pointer (1st time using this function xd)
+    drop(game_scenario);
 
     // after game end -> return to menu
     self.menu()

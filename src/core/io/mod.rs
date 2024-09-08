@@ -2,9 +2,9 @@ mod input;
 pub mod terminal;
 pub mod styled;
 
-use std::io::{self, Stdout};
-use crossterm::cursor::MoveUp;
-use crossterm::ExecutableCommand;
+use std::io::{self, Stdout, Write};
+use crossterm::cursor::{self, MoveUp, DisableBlinking};
+use crossterm::{execute, queue, ExecutableCommand};
 use crossterm::style::PrintStyledContent;
 use crossterm::terminal::{Clear, ClearType};
 
@@ -27,6 +27,21 @@ impl Terminal {
             stdout: io::stdout(),
             settings: terminal::TerminalSettings::default()
         }
+    }
+
+    pub fn queue_move_with_print(&mut self, pos: (u16, u16), p: StyledOutput) {
+        queue!(
+            self.stdout,
+            DisableBlinking,
+            cursor::MoveTo(pos.0, pos.1),
+            PrintStyledContent(p.to_styled()),
+            cursor::MoveTo(0, 0)
+        ).unwrap();
+    }
+
+    pub fn move_with_print(&mut self, pos: (u16, u16), p: StyledOutput) {
+        self.queue_move_with_print(pos, p);
+        self.flush();
     }
 
     pub fn print(&mut self, p: StyledOutput) {
@@ -122,6 +137,14 @@ impl Terminal {
 
     pub fn get_settings(&self) -> terminal::TerminalSettings {
         self.settings
+    }
+
+    pub fn clear_all(&mut self) {
+        execute!(self.stdout, Clear(ClearType::All)).unwrap();
+    }
+
+    pub fn flush(&mut self) {
+        self.stdout.flush().unwrap();
     }
 
     fn clear_line(&mut self) -> &mut Stdout {

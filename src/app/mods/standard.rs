@@ -6,7 +6,7 @@ use crate::core::random::Random;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Terminal};
 use crate::core::math::operations::MathOperation;
 
-use crate::app::{Scenario, ScenarioWithResults, MaxGameLength};
+use crate::app::{GameResults, MaxGameLength, Scenario};
 use crate::app::pastas::{PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON};
 
 type Range = StdRange<i64>;
@@ -46,7 +46,7 @@ impl<const N: usize, const OP: usize> Seed<N, OP> {
     /// Unified `range`. Random peak from `Vec` of `MathOperations`.
     pub fn new(range: Range, available_operations: Vec<MathOperation>) -> Self {
         let nums: [i64; N] = Random::generate(range);
-        let operations: [MathOperation; OP] = Random::peak(available_operations);
+        let operations: [MathOperation; OP] = Random::pick(available_operations);
 
         Self {
             nums, operations
@@ -82,7 +82,7 @@ impl<'a> Standard<'a> {
         }
     }
 
-    fn print(&mut self) -> bool {
+    fn render(&mut self) -> bool {
         let seed: Seed<2, 1> = Seed::new(
             self.difficulty_info.range.clone(),
             self.difficulty_info.operations.clone()
@@ -115,13 +115,13 @@ impl<'a> Standard<'a> {
 }
 
 impl Scenario for Standard<'_> {
-    fn start(mut self) -> Self {
+    fn start(&mut self) -> GameResults {
 
         // well, it means `right` or `correct`
         let mut 正 = 0;
 
         for _ in 0..self.difficulty_info.stages {
-           if self.print() {
+           if self.render() {
                正 += 1;
            }
         }
@@ -129,8 +129,8 @@ impl Scenario for Standard<'_> {
         // ALl answers are right AND funny pastas are enabled -> use them : use common words
         // `Type` may seem a bit weird, but `Random::peak` fn uses `const generic` to manipulate the number of returned values
         let outro_message: [&str; 1] = match 正 == self.difficulty_info.stages && self.t.get_settings().funny_pastas {
-            true => Random::peak(vec!(PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON)),
-            false => Random::peak(vec!("Good job!", "Nice!", "Not bad!")),
+            true => Random::pick(vec!(PUTIN, PUTIN_2, PEREKUR, BILLY_HERRINGTON)),
+            false => Random::pick(vec!("Good job!", "Nice!", "Not bad!")),
         };
 
         self.t.println(
@@ -139,14 +139,6 @@ impl Scenario for Standard<'_> {
                 .with_color(Color::Magenta)
         );
 
-        self
+        GameResults::from([(format!("Answers: "), format!("{}/{}", 正, self.difficulty_info.stages))])
     }
-}
-
-impl ScenarioWithResults for Standard<'_> {
-    fn get_result(self) -> i32{
-        // TODO
-        1i32
-    }
-    fn next(self) {}
 }

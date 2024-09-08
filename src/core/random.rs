@@ -6,10 +6,10 @@ pub struct Random;
 
 impl Random {
     /// Generates `N` random numbers
-    pub fn generate<const N: usize, R: SampleRange<i64> + Clone>(range: R) -> [i64; N] {
+    pub fn generate<const N: usize, I: Default + Copy, R: SampleRange<I> + Clone>(range: R) -> [I; N] {
         let mut r = rand::thread_rng();
 
-        let mut nums = [i64::default(); N];
+        let mut nums = [I::default(); N];
         for i in 0..N {
 
             nums[i] = range.clone().sample_single(&mut r);
@@ -19,7 +19,7 @@ impl Random {
     }
 
     /// Peaks `N` elements from `Vec`
-    pub fn peak<const N: usize, T>(variants: Vec<T>) -> [T; N]
+    pub fn pick<const N: usize, T>(variants: Vec<T>) -> [T; N]
     where T: Default + Copy + Clone
     {
         let mut r = rand::thread_rng();
