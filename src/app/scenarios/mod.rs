@@ -8,8 +8,6 @@ use crate::core::io::terminal::TerminalSettings;
 use crate::core::io::Terminal;
 use crate::core::io::{styled::{StyledInput, StyledOutput}, Color};
 
-use crate::app::Scenario;
-
 pub struct Scenarios {
   name: String,
   t: Terminal

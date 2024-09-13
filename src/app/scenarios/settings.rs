@@ -21,16 +21,15 @@ impl SettingScenarios {
   pub fn use_funny_pastas(t: &mut Terminal) -> bool {
     SettingsTemplates::toggleable_template(t, "Use funny pastas?: ", t.get_settings().funny_pastas)
   }
-
 }
 
 struct SettingsTemplates;
 
 impl SettingsTemplates {
-  fn toggleable_template(t: &mut Terminal, prompt: &str, flag: bool) -> bool {
-    let options = vec!("Yes", "No");
+fn toggleable_template(t: &mut Terminal, prompt: &str, flag: bool) -> bool {
+  let options = vec!("Yes", "No");
 
-    // true = 1 -> 1 - 1 = 0 => abs(0) = 0 => 1st option
+  // true = 1 -> 1 - 1 = 0 => abs(0) = 0 => 1st option
     // false = 0 -> 0 - 1 = -1 => abs(-1) = 1 => 2nd option
     let default_val = i8::abs((flag as i8) - 1) as usize;
 

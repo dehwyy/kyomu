@@ -1,6 +1,7 @@
 pub mod mods;
 pub mod scenarios;
 pub mod pastas;
+pub mod terminal;
 
 mod settings;
 
