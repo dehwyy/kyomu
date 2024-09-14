@@ -1,6 +1,7 @@
+use crossterm::event::{Event as CrosstermEvent, KeyCode};
 use super::key::{SpecialKey, KeyModifiers};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Event {
   Key(String),
   Quit
@@ -24,15 +25,10 @@ impl Event {
   }
 }
 
-impl From<crossterm::event::Event> for Event {
-  // TODO
-  fn from(event: crossterm::event::Event) -> Self {
-    use crossterm::event::{Event as E, KeyCode};
-
-    println!("{event:?}");
-
+impl From<CrosstermEvent> for Event {
+  fn from(event: CrosstermEvent) -> Self {
     match event {
-      E::Key(k) => {
+      CrosstermEvent::Key(k) => {
         let key_modifiers = KeyModifiers::from(k.modifiers);
 
         match k.code {
@@ -45,10 +41,8 @@ impl From<crossterm::event::Event> for Event {
           _ => {}
         };
 
-
         Self::Key(format!("{:?}", k.code))
       },
-
       _ => Self::Quit
     }
 

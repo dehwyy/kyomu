@@ -18,8 +18,4 @@ impl Terminal {
       stdout: stdout()
     }
   }
-
-  pub fn read_next_event(&self) -> Option<Event> {
-    Event::read()
-  }
 }
