@@ -1,9 +1,11 @@
 mod core;
 mod app;
+mod rt;
 
 use core::ui::Ui;
+use rt::config::RuntimeConfig;
 
-use tokio::time::{Instant, Duration, sleep};
+use tokio::time::{Instant, interval};
 use tokio::sync::broadcast;
 use futures::{StreamExt, FutureExt, select};
 
@@ -13,14 +15,16 @@ use app::terminal::Terminal;
 use app::terminal::event::Event;
 
 
-const FPS: u64 = 60;
-const FRAME_TIME: Duration = Duration::from_millis(1_000 / FPS);
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Clear terminal bytes sequence
     // print!("\x1B[2J\x1B[1;1H");
+
+    // TODO: config update
+    let rt_config = RuntimeConfig::new();
 
     enable_raw_mode()?;
 
@@ -32,11 +36,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut ui = Ui::new(rx);
     tokio::spawn(async move {
+        let mut _frames_rendered = 0u32;
+        let _start = Instant::now();
+
+        let mut interval = interval(rt_config.get_frame_time());
+
         loop {
+            if rt_config.get_flags().is_debug() {
+                println!(
+                    "rendering frame {_frames_rendered}, time passed {}, sleep time {}",
+                    _start.elapsed().as_millis(),
+                    rt_config.get_frame_time().as_millis()
+                );
+            }
+
             tokio::join!(
                 ui.render(),
-                sleep(FRAME_TIME)
+                interval.tick()
             );
+
+            _frames_rendered += 1
         }
     });
 
@@ -45,7 +64,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         select! {
             ev = event_reader.next().fuse() => {
                 if let Some(Ok(ev)) = ev {
-                    sleep(Duration::from_millis(10)).await;
                     let ev: Event = ev.into();
                     match ev {
                         Event::Quit => std::process::exit(0),

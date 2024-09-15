@@ -13,7 +13,6 @@ impl Ui {
   }
 
   pub async fn render(&mut self) {
-    let mut rotations = 0;
     while let Ok(e) = self.rx.try_recv() {
       println!("event occuried {e:?}");
     }
