@@ -10,7 +10,6 @@ bitflags! {
 
 impl RuntimeFlags {
     pub(super) fn initialize(args: Vec<String>) -> Self {
-        println!("{args:?}");
         let mut flags = Self::empty();
 
         for arg in args {

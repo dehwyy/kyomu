@@ -23,9 +23,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Clear terminal bytes sequence
     // print!("\x1B[2J\x1B[1;1H");
 
-    // TODO: config update
-    let rt_config = RuntimeConfig::new();
-
     enable_raw_mode()?;
 
     let mut event_reader = EventStream::new();
@@ -33,6 +30,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (tx, rx) = broadcast::channel::<Event>(32);
 
+
+    // TODO: config update
+    let rt_config = RuntimeConfig::new();
 
     let mut ui = Ui::new(rx);
     tokio::spawn(async move {

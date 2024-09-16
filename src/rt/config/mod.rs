@@ -53,8 +53,8 @@ impl RuntimeConfig {
             }
 
             if let Some(value) = value {
-              match value.as_str() {
-                "fps" => fps = parsed[1].parse().expect("failed to parse `fps` argument"),
+              match key.as_str() {
+                "fps" => fps = value.parse().expect("failed to parse `fps` argument"),
                 _ => {}
               }
             }
