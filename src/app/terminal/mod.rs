@@ -12,7 +12,6 @@ use crate::core::ui::Ui;
 
 pub struct Terminal {
   pub config: Config,
-  stdout: Stdout,
   rx: broadcast::Receiver<Event>,
   ui: Ui
 }
@@ -21,7 +20,6 @@ impl Terminal {
   pub fn new(rx: broadcast::Receiver<Event>, ui: Ui) -> Self {
     Self {
       config: Config::new(),
-      stdout: stdout(),
       rx,
       ui
     }

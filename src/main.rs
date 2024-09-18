@@ -3,6 +3,7 @@ mod app;
 mod rt;
 
 use core::ui::Ui;
+use app::scenes;
 use rt::config::RuntimeConfig;
 
 use tokio::time::{Instant, interval};
@@ -28,7 +29,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut event_reader = EventStream::new();
 
     let (tx, rx) = broadcast::channel::<Event>(32);
-    let ui = Ui::new();
+    let mut ui = Ui::new();
+    ui.set_scene(scenes::WelcomeScene::new());
 
     let mut t = Terminal::new(rx, ui);
 
