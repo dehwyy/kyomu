@@ -26,15 +26,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     enable_raw_mode()?;
 
     let mut event_reader = EventStream::new();
-    let t = Terminal::new();
 
     let (tx, rx) = broadcast::channel::<Event>(32);
+    let ui = Ui::new();
 
+    let mut t = Terminal::new(rx, ui);
 
     // TODO: config update
     let rt_config = RuntimeConfig::new();
 
-    let mut ui = Ui::new(rx);
     tokio::spawn(async move {
         let mut _frames_rendered = 0u32;
         let _start = Instant::now();
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
 
             tokio::join!(
-                ui.render(),
+                t.render(),
                 interval.tick()
             );
 
