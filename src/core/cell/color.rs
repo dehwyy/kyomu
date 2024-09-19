@@ -1,0 +1,20 @@
+#[derive(Copy, Clone)]
+pub struct Rgb(u8, u8, u8);
+
+pub enum Color {
+  Red,
+  Green,
+  Blue,
+  Rgb(Rgb)
+}
+
+impl Color {
+  pub fn get_rgb(&self) -> Rgb {
+    match self {
+      Self::Red => Rgb(255, 0, 0),
+      Self::Green => Rgb(0, 255, 0),
+      Self::Blue => Rgb(0, 0, 255),
+      Self::Rgb(rgb_color) => *rgb_color
+    }
+  }
+}
