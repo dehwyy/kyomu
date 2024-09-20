@@ -5,43 +5,37 @@ use color::Color;
 pub type TerminalPosition = (u16, u16);
 
 #[derive(Default)]
-pub struct CellInner {
-  pub bg_color: Option<Color>,
-  pub el_color: Option<Color>,
+pub struct Cell {
+  pub bg: Option<Color>,
+  pub fg: Option<Color>,
   pub el: char,
-  pub el_width: u8,
+  pub width: u8,
   pub pos: TerminalPosition
 }
 
-enum Cell {
-  Empty(TerminalPosition),
-  Colored(Color, TerminalPosition),
-  // char, color, bg_color, position
-  Content(char, Option<Color>, Option<Color>, TerminalPosition)
-}
+impl Cell {
+  pub fn new_empty(pos: TerminalPosition) -> Self {
+    Self {
+      pos,
+      ..Default::default()
+    }
+  }
 
-impl Into<CellInner> for Cell {
-  fn into(self) -> CellInner {
-      match self {
-        Self::Empty(pos) => CellInner {
-          pos,
-          el: ' ',
-          ..Default::default()
-        },
-        Self::Colored(color, pos) => CellInner {
-          pos,
-          bg_color: Some(color),
-          el_width: 2,
-          el: ' ',
-          ..Default::default()
-        },
-        Self::Content(el, el_color, bg_color, pos) => CellInner {
-          pos,
-          el,
-          el_color,
-          bg_color,
-          el_width: 1
-        }
-      }
+  pub fn new_colored(bg_color: Color, pos: TerminalPosition) -> Self {
+    Self {
+      pos,
+      bg: Some(bg_color),
+      ..Default::default()
+    }
+  }
+
+  pub fn new_content(el: char, fg: Option<Color>, bg: Option<Color>, pos: TerminalPosition) -> Self {
+    Self {
+      pos,
+      el,
+      bg,
+      fg,
+      width: 1
+    }
   }
 }

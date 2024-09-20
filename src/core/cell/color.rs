@@ -9,7 +9,7 @@ pub enum Color {
 }
 
 impl Color {
-  pub fn get_rgb(&self) -> Rgb {
+  pub fn to_rgb(&self) -> Rgb {
     match self {
       Self::Red => Rgb(255, 0, 0),
       Self::Green => Rgb(0, 255, 0),

@@ -1,27 +1,25 @@
-pub mod config;
 pub mod event;
 pub mod key;
 
 use std::io::{stdout, Stdout};
 use tokio::sync::broadcast;
 
-use config::Config;
 use event::Event;
 
 use crate::core::ui::Ui;
 
+pub type TerminalSize = (u16, u16);
+
 pub struct Terminal {
-  pub config: Config,
   rx: broadcast::Receiver<Event>,
-  ui: Ui
+  ui: Ui,
 }
 
 impl Terminal {
   pub fn new(rx: broadcast::Receiver<Event>, ui: Ui) -> Self {
     Self {
-      config: Config::new(),
       rx,
-      ui
+      ui,
     }
   }
 
