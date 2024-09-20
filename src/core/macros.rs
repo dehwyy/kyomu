@@ -6,3 +6,10 @@ macro_rules! input {
         s.trim_end().to_owned()
     }};
 }
+
+#[macro_export]
+macro_rules! boxed {
+    ($($x:expr),*) => {{
+        Box::new(($($x),*))
+    }}
+}

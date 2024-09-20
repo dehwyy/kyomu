@@ -3,8 +3,14 @@ pub mod components;
 use tokio::io::{stdout, Stdout};
 
 
+pub type TerminalSize = (u16, u16);
+pub type TerminalPosition = (u16, u16);
+
+
+
+#[async_trait::async_trait]
 pub trait Renderable: Send {
-  fn render(&self, stdout: &mut Stdout);
+  async fn render(&mut self, stdout: &mut Stdout);
 }
 
 pub struct Ui {
@@ -26,8 +32,7 @@ impl Ui {
 
   pub async fn render(&mut self) {
     if let Some(scene) = &mut self.scene {
-      scene.render(&mut self.stdout);
+      scene.render(&mut self.stdout).await;
     }
-    todo!()
   }
 }

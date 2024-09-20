@@ -26,4 +26,8 @@ impl Terminal {
   pub async fn render(&mut self) {
     self.ui.render().await;
   }
+
+  pub fn get_size() -> TerminalSize {
+    crossterm::terminal::size().unwrap_or((1, 1))
+  }
 }
