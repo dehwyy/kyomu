@@ -21,7 +21,6 @@ use app::terminal::event::Event;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
-    // Clear terminal bytes sequence
     // print!("\x1B[2J\x1B[1;1H");
 
     enable_raw_mode()?;

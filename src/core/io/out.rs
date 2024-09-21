@@ -3,7 +3,7 @@ use std::fmt::Display;
 use tokio::io::{Stdout, AsyncWriteExt, Error as WriteError};
 
 
-use super::out_flags::OutputFlags;
+use super::{ansi::{self, AnsiSequence}, out_flags::OutputFlags};
 use crate::{colored, core::cell::color::{self, Color}};
 
 
@@ -35,11 +35,14 @@ impl Output {
   }
 
 
-  // TODO: flags...
+  // TODO: colors...
   pub async fn write<S>(&mut self, stdout: &mut Stdout, s: S) -> Result<(), WriteError>
   where S: Display
   {
-    let (ansi_start, ansi_end) = self.flags.get_ansi_sequence();
+    let mut ansi_sequence = AnsiSequence::new();
+
+    ansi_sequence.inject_flags(self.flags).inject_fg_color(self.color);
+    let (ansi_start, ansi_end) = ansi_sequence.get();
 
     let s = format!("{ansi_start}{s}{ansi_end}");
 

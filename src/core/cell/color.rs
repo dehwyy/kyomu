@@ -1,7 +1,7 @@
 #[derive(Copy, Clone)]
 pub struct Rgb(u8, u8, u8);
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub enum Color {
   #[default]
   White,

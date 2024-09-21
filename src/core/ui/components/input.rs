@@ -1,6 +1,6 @@
 use tokio::io::{Stdout, AsyncWriteExt};
 
-use crate::{app::terminal::Terminal, core::{geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
+use crate::{app::terminal::Terminal, core::{cell::color::Color, geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
 
 use super::{Component, ComponentInner};
 
@@ -43,8 +43,8 @@ impl Component for Input {
 
     Output::new()
       .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
+      .color(Color::Blue)
       .write(stdout, format!("hello private\n")).await.unwrap();
-    // stdout.write_all(format!("\r{placeholder_formatted}{val}").as_bytes()).await.unwrap();
   }
 
   // TODO
