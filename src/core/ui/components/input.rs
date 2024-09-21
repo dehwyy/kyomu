@@ -1,6 +1,6 @@
 use tokio::io::{Stdout, AsyncWriteExt};
 
-use crate::{app::terminal::Terminal, core::{geom::align::Align, ui::TerminalSize}};
+use crate::{app::terminal::Terminal, core::{geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
 
 use super::{Component, ComponentInner};
 
@@ -37,12 +37,14 @@ impl Component for Input {
   async fn render(&mut self, stdout: &mut Stdout) {
     let placeholder_formatted = self.placeholder.as_ref()
       .map(|s| format!("{s}: "))
-      .unwrap_or(String::new());
+      .unwrap_or(String::from(""));
 
     let val = self.value.clone().unwrap_or_default();
 
-    stdout.write_all(format!("{placeholder_formatted}{val}").as_bytes()).await.unwrap();
-    stdout.flush().await.unwrap();
+    Output::new()
+      .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
+      .write(stdout, format!("hello private\n")).await.unwrap();
+    // stdout.write_all(format!("\r{placeholder_formatted}{val}").as_bytes()).await.unwrap();
   }
 
   // TODO

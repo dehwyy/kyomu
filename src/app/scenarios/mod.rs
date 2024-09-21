@@ -4,9 +4,9 @@ pub mod settings;
 use game::GameScenarios;
 use settings::SettingScenarios;
 
-use crate::core::io::terminal::TerminalSettings;
-use crate::core::io::Terminal;
-use crate::core::io::{styled::{StyledInput, StyledOutput}, Color};
+use crate::core::io2::terminal::TerminalSettings;
+use crate::core::io2::Terminal;
+use crate::core::io2::{styled::{StyledInput, StyledOutput}, Color};
 
 pub struct Scenarios {
   name: String,

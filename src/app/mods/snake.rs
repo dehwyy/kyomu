@@ -5,7 +5,7 @@ use std::collections::VecDeque;
 
 use crossterm::event::{poll, read, Event, KeyCode};
 
-use crate::core::io::{styled::StyledOutput, Color, Terminal};
+use crate::core::io2::{styled::StyledOutput, Color, Terminal};
 use crate::app::{Scenario, GameResults};
 use crate::core::random::Random;
 

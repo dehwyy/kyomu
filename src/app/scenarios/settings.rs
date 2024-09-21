@@ -1,4 +1,4 @@
-use crate::core::io::{styled::{StyledOutput, StyledInput}, Color, Terminal};
+use crate::core::io2::{styled::{StyledOutput, StyledInput}, Color, Terminal};
 
 pub struct SettingScenarios;
 

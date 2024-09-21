@@ -1,4 +1,4 @@
-use crate::core::io::Terminal;
+use crate::core::io2::Terminal;
 use crate::core::math::MathOperation;
 
 use crate::app::Scenario;

@@ -1,5 +1,5 @@
 use crossterm::style::{Color, StyledContent, Stylize};
-use crate::core::io::input::InputValue;
+use crate::core::io2::input::InputValue;
 
 #[derive(Default)]
 pub struct StyledOutput {

@@ -13,3 +13,12 @@ macro_rules! boxed {
         Box::new(($($x),*))
     }}
 }
+
+#[macro_export]
+macro_rules! colored {
+    ($color:expr) => {{
+        |s: String| String::from(
+            format!("\x1b[{}m{}\x1b[0m", $color, s)
+        )
+    }};
+}
