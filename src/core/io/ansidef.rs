@@ -6,18 +6,11 @@ macro_rules! ansidef_variable {
 
 
 macro_rules! ansidef_function {
-    ($var:ident, $fn:expr, $args:expr) => {
-        pub fn $var<Iter: IntoIterator<Item = impl std::fmt::Display>>(args: Iter) -> Vec<String> {
-          $args.into_iter().map(|s| s.to_string())
-            .chain(
-              args.into_iter().map(|s| s.to_string())
-            )
-          .collect::<Vec<_>>()
+    ($var:ident, $fn_args:tt, $fn:expr) => {
+        pub fn $var(args: $fn_args) -> Vec<String> {
+          $fn(args).into_iter().map(|s| s.to_string()).collect::<Vec<_>>()
         }
     };
-    ($var:ident, $fn:expr) => {
-      ansidef_function!($var, $fn, [] as [u8; 0]);
-    }
 }
 
 // Global
