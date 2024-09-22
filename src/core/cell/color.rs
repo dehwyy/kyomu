@@ -1,6 +1,24 @@
 #[derive(Copy, Clone)]
 pub struct Rgb(u8, u8, u8);
 
+impl Rgb {
+  pub fn new(r: u8, g: u8, b: u8) -> Self {
+    Self(r, g, b)
+  }
+
+  pub fn get_r(self) -> u8 {
+    self.0
+  }
+
+  pub fn get_g(self) -> u8 {
+    self.1
+  }
+
+  pub fn get_b(self) -> u8 {
+    self.2
+  }
+}
+
 #[derive(Default, Copy, Clone)]
 pub enum Color {
   #[default]
