@@ -6,15 +6,21 @@ use super::out_flags::OutputFlags;
 
 macro_rules! escaped {
     ($s:expr) => {{
-      format!("\x1b[{}m", $s.into_iter().collect::<Vec<_>>().join(";"))
+      format!(
+        "\x1b[{}m",
+        $s.into_iter()
+          .map(|s| format!("{:X}", s)) // to Hex
+          .collect::<Vec<_>>()
+          .join(";")
+      )
     }};
 }
 
 
 
 pub(super) struct AnsiSequence {
-  before: Vec<String>,
-  after: VecDeque<String>,
+  before: Vec<u8>,
+  after: VecDeque<u8>,
 }
 
 impl AnsiSequence {
@@ -27,17 +33,19 @@ impl AnsiSequence {
 
   // Push to `end_sequence`.
   pub fn push(&mut self, ansi_char: u8) {
-    self.after.push_back(ansi_char.to_string());
+    const v: u8 =0x0B;
+    // v
+    self.after.push_back(ansi_char);
   }
 
   // Add to `start_sequence`.
   pub fn add(&mut self, ansi_char: u8) {
-    self.before.push(ansi_char.to_string());
+    self.before.push(ansi_char);
   }
 
   pub fn add_pair(&mut self, start: u8, end: u8) {
-    self.before.push(start.to_string());
-    self.after.push_front(end.to_string());
+    self.before.push(start);
+    self.after.push_front(end);
   }
 
   pub fn inject_flags(mut self, flags: OutputFlags) -> Self {
