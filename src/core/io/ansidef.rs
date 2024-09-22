@@ -14,23 +14,26 @@ macro_rules! ansidef_function {
 }
 
 // Global
-ansidef_variable!(RESET, 0x0);
+ansidef_variable!(RESET, 0);
 // Style
-ansidef_variable!(BOLD, 0x1);
-ansidef_variable!(DIM, 0x2);
-ansidef_variable!(ITALIC, 0x3);
-ansidef_variable!(UNDERLINE, 0x4);
-ansidef_variable!(BLINKING, 0x5);
-ansidef_variable!(INVERTED, 0x7);
-ansidef_variable!(HIDDEN, 0x8);
-ansidef_variable!(STRIKETHROUGH, 0x9);
+ansidef_variable!(BOLD, 1);
+ansidef_variable!(DIM, 2);
+ansidef_variable!(ITALIC, 3);
+ansidef_variable!(UNDERLINE, 4);
+ansidef_variable!(BLINKING, 5);
+ansidef_variable!(INVERTED, 7);
+ansidef_variable!(HIDDEN, 8);
+ansidef_variable!(STRIKETHROUGH, 9);
 
 // Color
-ansidef_variable!(BLACK, 0x30);
-ansidef_variable!(RED, 0x31);
-ansidef_variable!(GREEN, 0x32);
-ansidef_variable!(YELLOW, 0x33);
-ansidef_variable!(BLUE, 0x34);
-ansidef_variable!(MAGENTA, 0x35);
-ansidef_variable!(CYAN, 0x36);
-ansidef_variable!(WHITE, 0x37);
+ansidef_variable!(BLACK, 30);
+ansidef_variable!(RED, 31);
+ansidef_variable!(GREEN, 32);
+ansidef_variable!(YELLOW, 33);
+ansidef_variable!(BLUE, 34);
+ansidef_variable!(MAGENTA, 35);
+ansidef_variable!(CYAN, 36);
+ansidef_variable!(WHITE, 37);
+
+ansidef_variable!(RGB, 38);
+ansidef_function!(rgb, (u8, u8, u8, u8), |(start, r, g, b)| vec!(start, 2, r, g, b));

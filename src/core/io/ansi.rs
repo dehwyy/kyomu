@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::fmt::Display;
 use crate::core::cell::color::Color;
 
 use super::ansidef as ansi;
@@ -9,7 +10,6 @@ macro_rules! escaped {
       format!(
         "\x1b[{}m",
         $s.into_iter()
-          .map(|s| format!("{:X}", s)) // to Hex
           .collect::<Vec<_>>()
           .join(";")
       )
@@ -19,8 +19,8 @@ macro_rules! escaped {
 
 
 pub(super) struct AnsiSequence {
-  before: Vec<u8>,
-  after: VecDeque<u8>,
+  before: Vec<String>,
+  after: VecDeque<String>,
 }
 
 impl AnsiSequence {
@@ -32,20 +32,24 @@ impl AnsiSequence {
   }
 
   // Push to `end_sequence`.
-  pub fn push(&mut self, ansi_char: u8) {
-    const v: u8 =0x0B;
-    // v
-    self.after.push_back(ansi_char);
+  pub fn push(&mut self, ansi_char: impl Display) {
+    self.after.push_back(ansi_char.to_string());
   }
 
   // Add to `start_sequence`.
-  pub fn add(&mut self, ansi_char: u8) {
-    self.before.push(ansi_char);
+  pub fn add(&mut self, ansi_char: impl Display) {
+    self.before.push(ansi_char.to_string());
   }
 
-  pub fn add_pair(&mut self, start: u8, end: u8) {
-    self.before.push(start);
-    self.after.push_front(end);
+  pub fn add_vec<D: Display>(&mut self, ansi_chars: Vec<D>) {
+    self.before.extend(
+      ansi_chars.into_iter().map(|s| s.to_string())
+    );
+  }
+
+  pub fn add_pair<D: Display>(&mut self, start: D, end: D) {
+    self.before.push(start.to_string());
+    self.after.push_front(end.to_string());
   }
 
   pub fn inject_flags(mut self, flags: OutputFlags) -> Self {
@@ -61,15 +65,12 @@ impl AnsiSequence {
   }
 
   pub fn inject_fg_color(mut self, color: Color) -> Self {
-    self.add(color.into());
+    self.add_vec(color.to_ansi(false));
     self
   }
 
   pub fn inject_bg_color(mut self, color: Color) -> Self {
-    let color_fg: u8 = color.into();
-
-    // foreground_color + 10 == background_color in ANSI
-    self.add(color_fg + 10);
+    self.add_vec(color.to_ansi(true));
     self
   }
 
@@ -81,15 +82,26 @@ impl AnsiSequence {
   }
 }
 
-impl Into<u8> for Color {
-  fn into(self) -> u8 {
+impl Color {
+  fn to_ansi(self, for_bg: bool) -> Vec<String> {
+    let bg_delta = for_bg.then_some(10u8).unwrap_or(0);
+
     match self {
-      Self::White => ansi::WHITE,
-      Self::Red => ansi::RED,
-      Self::Green => ansi::GREEN,
-      Self::Blue => ansi::BLUE,
-      // TODO
-      Self::Rgb(_) => 39,
+      Self::Rgb(rgb) => ansi::rgb(
+        (ansi::RGB + bg_delta, rgb.get_r(), rgb.get_g(), rgb.get_b()),
+      ),
+
+      common_color => {
+        let color = match common_color {
+          Self::White => ansi::WHITE,
+          Self::Red => ansi::RED,
+          Self::Green => ansi::GREEN,
+          Self::Blue => ansi::BLUE,
+          _ => ansi::WHITE
+        };
+
+        vec!((color + bg_delta).to_string())
+      }
     }
   }
 }
