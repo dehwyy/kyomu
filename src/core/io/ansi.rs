@@ -57,8 +57,32 @@ impl AnsiSequence {
       self.add(ansi::BOLD);
     }
 
+    if flags.contains(OutputFlags::DIM) {
+      self.add(ansi::DIM);
+    }
+
+    if flags.contains(OutputFlags::ITALIC) {
+      self.add(ansi::ITALIC);
+    }
+
     if flags.contains(OutputFlags::UNDERLINE) {
       self.add(ansi::UNDERLINE);
+    }
+
+    if flags.contains(OutputFlags::BLINKING) {
+      self.add(ansi::BLINKING);
+    }
+
+    if flags.contains(OutputFlags::INVERTED) {
+      self.add(ansi::INVERTED);
+    }
+
+    if flags.contains(OutputFlags::HIDDEN) {
+      self.add(ansi::HIDDEN);
+    }
+
+    if flags.contains(OutputFlags::STRIKETHROUGH) {
+      self.add(ansi::STRIKETHROUGH);
     }
 
     self
