@@ -15,13 +15,14 @@ macro_rules! ansidef_function {
 
 // Global
 ansidef_variable!(RESET, 0);
+
 // Style
 ansidef_variable!(BOLD, 1);
 ansidef_variable!(DIM, 2);
 ansidef_variable!(ITALIC, 3);
 ansidef_variable!(UNDERLINE, 4);
-ansidef_variable!(BLINKING, 5);
-ansidef_variable!(INVERTED, 7);
+ansidef_variable!(BLINKING, 5); // Switches from `Normal` to `Dim` color.
+ansidef_variable!(INVERTED, 7); // Switches background and foreground colors.
 ansidef_variable!(HIDDEN, 8);
 ansidef_variable!(STRIKETHROUGH, 9);
 
@@ -34,6 +35,5 @@ ansidef_variable!(BLUE, 34);
 ansidef_variable!(MAGENTA, 35);
 ansidef_variable!(CYAN, 36);
 ansidef_variable!(WHITE, 37);
-
 ansidef_variable!(RGB, 38);
 ansidef_function!(rgb, (u8, u8, u8, u8), |(start, r, g, b)| vec!(start, 2, r, g, b));
