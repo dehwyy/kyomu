@@ -1,8 +1,8 @@
 use std::borrow::BorrowMut;
 
-use tokio::io::Stdout;
+use tokio::{io::Stdout, sync::broadcast};
 
-use crate::core::ui::{components::{Component, input::Input}, Renderable};
+use crate::{app::terminal::event::Event, core::ui::{components::{input::Input, Component}, Renderable}};
 use crate::boxed;
 
 pub struct WelcomeScene {
@@ -12,10 +12,10 @@ pub struct WelcomeScene {
 
 impl WelcomeScene {
 
-  pub fn new() -> Self {
+  pub fn new(rx: broadcast::Receiver<Event>) -> Self {
     Self {
       stage: 0,
-      components: [boxed!(Input::new())]
+      components: [boxed!(Input::new(rx))]
     }
   }
 }

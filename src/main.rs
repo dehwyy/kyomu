@@ -16,8 +16,6 @@ use app::terminal::Terminal;
 use app::terminal::event::Event;
 
 
-
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
@@ -29,7 +27,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (tx, rx) = broadcast::channel::<Event>(32);
     let mut ui = Ui::new();
-    ui.set_scene(scenes::WelcomeScene::new());
+
+    ui.set_scene(scenes::WelcomeScene::new(tx.subscribe()));
 
     let mut t = Terminal::new(rx, ui);
 

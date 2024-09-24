@@ -1,6 +1,8 @@
 use crossterm::event::{Event as CrosstermEvent, KeyCode};
 use super::key::{SpecialKey, KeyModifiers};
 
+pub type EventReceiver = tokio::sync::broadcast::Receiver<Event>;
+
 #[derive(Debug, Clone)]
 pub enum Event {
   Key(String),

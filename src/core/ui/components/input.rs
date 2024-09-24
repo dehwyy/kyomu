@@ -1,23 +1,25 @@
 use tokio::io::{Stdout, AsyncWriteExt};
 
-use crate::{app::terminal::Terminal, core::{cell::color::Color, geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
+use crate::{app::terminal::{event::{Event, EventReceiver}, Terminal}, core::{cell::color::{Color, Rgb}, geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
 
 use super::{Component, ComponentInner};
 
-#[derive(Default)]
 pub struct Input {
+  rx: EventReceiver,
   value: Option<String>,
   placeholder: Option<String>,
   inner: ComponentInner
 }
 
 impl Input {
-  pub fn new() -> Self {
+  pub fn new(rx: EventReceiver) -> Self {
     Self {
       inner: ComponentInner {
         ..Default::default()
       },
-      ..Default::default()
+      rx,
+      value: None,
+      placeholder: None
     }
   }
 
@@ -43,7 +45,6 @@ impl Component for Input {
 
     Output::new()
       .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
-      .color(Color::Blue)
       .write(stdout, format!("hello private\n")).await.unwrap();
   }
 
