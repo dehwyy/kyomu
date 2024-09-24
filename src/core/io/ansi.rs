@@ -19,37 +19,32 @@ macro_rules! escaped {
 
 
 pub(super) struct AnsiSequence {
-  before: Vec<String>,
-  after: VecDeque<String>,
+  start: Vec<String>,
+  end: VecDeque<String>,
 }
 
 impl AnsiSequence {
   pub(super) fn new() -> Self {
     Self {
-      before: Vec::new(),
-      after: VecDeque::new(),
+      start: Vec::new(),
+      end: VecDeque::new(),
     }
   }
 
   // Push to `end_sequence`.
   pub fn push(&mut self, ansi_char: impl Display) {
-    self.after.push_back(ansi_char.to_string());
+    self.end.push_back(ansi_char.to_string());
   }
 
   // Add to `start_sequence`.
   pub fn add(&mut self, ansi_char: impl Display) {
-    self.before.push(ansi_char.to_string());
+    self.start.push(ansi_char.to_string());
   }
 
   pub fn add_vec<D: Display>(&mut self, ansi_chars: Vec<D>) {
-    self.before.extend(
+    self.start.extend(
       ansi_chars.into_iter().map(|s| s.to_string())
     );
-  }
-
-  pub fn add_pair<D: Display>(&mut self, start: D, end: D) {
-    self.before.push(start.to_string());
-    self.after.push_front(end.to_string());
   }
 
   pub fn inject_flags(mut self, flags: OutputFlags) -> Self {
@@ -98,11 +93,11 @@ impl AnsiSequence {
     self
   }
 
-  /// Returns (`before`, `after`), which are Ansi Escape Sequences.
+  /// Returns (`start`, `end`), which are Ansi Escape Sequences.
   pub fn compile(mut self) -> (String, String) {
     self.push(ansi::RESET);
 
-    (escaped!(self.before), escaped!(self.after))
+    (escaped!(self.start), escaped!(self.end))
   }
 }
 
