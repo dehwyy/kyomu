@@ -40,9 +40,8 @@ impl Output {
     self
   }
 
-  // `false` by default
-  pub fn new_line(mut self, new_line: bool) -> Self {
-    self.new_line = new_line;
+  pub fn new_lined(mut self) -> Self {
+    self.new_line = true;
     self
   }
 
@@ -58,14 +57,14 @@ impl Output {
       ansi_sequence = ansi_sequence.inject_bg_color(bg_color);
     }
 
+    if self.new_line {
+      ansi_sequence = ansi_sequence.new_lined();
+    }
+
     let (ansi_start, ansi_end) = ansi_sequence.compile();
 
 
-    let mut s = format!("{ansi_start}{s}{ansi_end}");
-
-    if self.new_line {
-      s += "\n";
-    }
+    let s = format!("{ansi_start}{s}{ansi_end}");
 
     stdout.write_all(s.as_bytes()).await?;
 

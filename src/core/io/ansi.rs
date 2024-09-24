@@ -93,6 +93,11 @@ impl AnsiSequence {
     self
   }
 
+  pub fn new_lined(mut self) -> Self {
+    self.push(ansi::NEW_LINE);
+    self
+  }
+
   /// Returns (`start`, `end`), which are Ansi Escape Sequences.
   pub fn compile(mut self) -> (String, String) {
     self.push(ansi::RESET);
