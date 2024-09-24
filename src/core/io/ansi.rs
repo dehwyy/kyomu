@@ -103,13 +103,15 @@ impl AnsiSequence {
 
 impl Color {
   fn to_ansi(self, for_bg: bool) -> Vec<String> {
-    let bg_delta = for_bg.then_some(10u8).unwrap_or(0);
+    let ansi_with_delta = move |ansi: &str| {
+      ansi.parse::<u8>().unwrap() + for_bg.then_some(10u8).unwrap_or(0)
+    };
+
 
     match self {
-      Self::Rgb(rgb) => ansi::rgb(
-        (ansi::RGB + bg_delta, rgb.get_r(), rgb.get_g(), rgb.get_b()),
+      Self::Rgb(  rgb) => ansi::rgb(
+        (ansi_with_delta(ansi::RGB), rgb.get_r(), rgb.get_g(), rgb.get_b()),
       ),
-
       common_color => {
         let color = match common_color {
           Self::White => ansi::WHITE,
@@ -119,7 +121,7 @@ impl Color {
           _ => ansi::WHITE
         };
 
-        vec!((color + bg_delta).to_string())
+        vec!((ansi_with_delta(color)).to_string())
       }
     }
   }

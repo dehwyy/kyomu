@@ -6,7 +6,7 @@ use super::ansi::AnsiSequence;
 use super::out_flags::OutputFlags;
 
 
-use crate::core::cell::color::{Color, Rgb};
+use crate::core::cell::color::Color;
 
 
 #[derive(Default)]
@@ -52,7 +52,7 @@ impl Output {
   {
     let mut ansi_sequence = AnsiSequence::new()
       .inject_flags(self.flags)
-      .inject_fg_color(Color::Rgb(Rgb::new(200, 240, 10)));
+      .inject_fg_color(self.fg_color);
 
     if let Some(bg_color) = self.bg_color {
       ansi_sequence = ansi_sequence.inject_bg_color(bg_color);
