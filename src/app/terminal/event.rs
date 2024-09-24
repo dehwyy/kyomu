@@ -5,7 +5,7 @@ pub type EventReceiver = tokio::sync::broadcast::Receiver<Event>;
 
 #[derive(Debug, Clone)]
 pub enum Event {
-  Key(String),
+  Key(KeyCode),
   Quit
 }
 
@@ -43,7 +43,7 @@ impl From<CrosstermEvent> for Event {
           _ => {}
         };
 
-        Self::Key(format!("{:?}", k.code))
+        Self::Key(k.code)
       },
       _ => Self::Quit
     }

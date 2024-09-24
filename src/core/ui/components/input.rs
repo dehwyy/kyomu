@@ -1,4 +1,5 @@
-use tokio::io::{Stdout, AsyncWriteExt};
+use crossterm::event::KeyCode;
+use tokio::{io::{AsyncWriteExt, Stdout}, sync::broadcast};
 
 use crate::{app::terminal::{event::{Event, EventReceiver}, Terminal}, core::{cell::color::{Color, Rgb}, geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
 
@@ -23,6 +24,14 @@ impl Input {
     }
   }
 
+  fn get_placeholder(&self) -> String {
+    self.placeholder.clone().unwrap_or("Input".to_string())
+  }
+
+  fn get_value(&self) -> String {
+    self.value.clone().unwrap_or_default()
+  }
+
   pub fn set_placeholder(&mut self, placeholder: String) -> &mut Self {
     self.placeholder = Some(placeholder);
     self
@@ -37,15 +46,27 @@ impl Input {
 #[async_trait::async_trait]
 impl Component for Input {
   async fn render(&mut self, stdout: &mut Stdout) {
-    let placeholder_formatted = self.placeholder.as_ref()
-      .map(|s| format!("{s}: "))
-      .unwrap_or(String::from(""));
-
-    let val = self.value.clone().unwrap_or_default();
+    while let Ok(new_event) = self.rx.try_recv() {
+      if let Event::Key(key) = new_event {
+        if let KeyCode::Char(c) = key {
+          self.set_value(|v| format!("{}{c}", v.clone().unwrap_or_default()));
+        }
+      }
+    }
 
     Output::new()
-      .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
-      .write(stdout, format!("hello private\n")).await.unwrap();
+      .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD | OutputFlags::STRIKETHROUGH)
+      .fg_color(Color::Rgb(Rgb::new(200, 40, 120)))
+      // .new_lined()
+      .write(stdout, self.get_placeholder()).await.unwrap();
+
+    Output::new()
+      .write(stdout, ": ").await.unwrap();
+
+    Output::new()
+      .fg_color(Color::Red)
+      .new_lined()
+      .write(stdout, self.get_value()).await.unwrap();
   }
 
   // TODO
