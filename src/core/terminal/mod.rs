@@ -1,22 +1,19 @@
-pub mod event;
-pub mod key;
-
-use std::io::{stdout, Stdout};
 use tokio::sync::broadcast;
-
-use event::Event;
 
 use crate::core::ui::Ui;
 
+use super::event::EventReceiver;
+
 pub type TerminalSize = (u16, u16);
+pub type TerminalPosition = (u16, u16);
 
 pub struct Terminal {
-  rx: broadcast::Receiver<Event>,
+  rx: EventReceiver,
   ui: Ui,
 }
 
 impl Terminal {
-  pub fn new(rx: broadcast::Receiver<Event>, ui: Ui) -> Self {
+  pub fn new(rx: EventReceiver, ui: Ui) -> Self {
     Self {
       rx,
       ui,

@@ -6,8 +6,6 @@ use tokio::io::Stdout;
 use crate::core::cell::Position;
 use crate::core::geom::align::Align;
 
-use super::TerminalSize;
-
 pub type ComponentSize = (u16, u16);
 
 #[derive(Default)]

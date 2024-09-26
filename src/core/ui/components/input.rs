@@ -1,7 +1,10 @@
 use crossterm::event::KeyCode;
 use tokio::{io::{AsyncWriteExt, Stdout}, sync::broadcast};
 
-use crate::{app::terminal::{event::{Event, EventReceiver}, Terminal}, core::{cell::color::{Color, Rgb}, geom::align::Align, io::{out::Output, out_flags::OutputFlags}, ui::TerminalSize}};
+use crate::core::{cell::color::{Color, Rgb}, event::key::Key, geom::align::Align, io::{out::Output, out_flags::OutputFlags}};
+
+use crate::core::terminal::{Terminal, TerminalSize};
+use crate::core::event::{Event, EventReceiver};
 
 use super::{Component, ComponentInner};
 
@@ -48,8 +51,8 @@ impl Component for Input {
   async fn render(&mut self, stdout: &mut Stdout) {
     while let Ok(new_event) = self.rx.try_recv() {
       if let Event::Key(key) = new_event {
-        if let KeyCode::Char(c) = key {
-          self.set_value(|v| format!("{}{c}", v.clone().unwrap_or_default()));
+        if let Key::Char(c) = key {
+          self.set_value(|v| format!("{}{}", v.clone().unwrap_or_default(), c.ch));
         }
       }
     }

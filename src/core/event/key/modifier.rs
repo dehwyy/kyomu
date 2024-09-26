@@ -1,6 +1,6 @@
 use crossterm::event::KeyModifiers as CrosstermKeyModifiers;
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Modifier {
   Ctrl,
   Shift,

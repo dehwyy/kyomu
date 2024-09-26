@@ -1,6 +1,6 @@
 use super::Modifier;
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct KeyChar {
   pub ch: char,
   pub modifiers: Vec<Modifier>

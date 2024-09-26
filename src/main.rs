@@ -2,23 +2,21 @@ mod core;
 mod app;
 mod rt;
 
+use core::event::Event;
+use core::terminal::Terminal;
 use core::ui::Ui;
 use app::scenes;
 use rt::config::RuntimeConfig;
 
 use tokio::time::{Instant, interval};
 use tokio::sync::broadcast;
-use futures::{StreamExt, FutureExt, select};
+use std::process::exit;
+use futures::{FutureExt, select};
 
 use crossterm::{event::EventStream, terminal::enable_raw_mode};
 
-use app::terminal::Terminal;
-use app::terminal::event::Event;
-
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-
     // print!("\x1B[2J\x1B[1;1H");
 
     enable_raw_mode()?;
@@ -60,19 +58,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     loop {
-        // proccess all events -> render -> sleep (frame time)
         select! {
-            ev = event_reader.next().fuse() => {
-                if let Some(Ok(ev)) = ev {
-                    let ev: Event = ev.into();
+            ev = Event::read().fuse() => {
+                if let Some(ev) = ev {
                     match ev {
-                        Event::Quit => std::process::exit(0),
-                        e => tx.send(e).unwrap(),
+                        Event::Quit => exit(0),
+                        ev => tx.send(ev).unwrap()
                     };
-                } else {
-                    std::process::exit(1);
                 }
             }
-        };
+        }
     }
 }

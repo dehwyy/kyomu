@@ -6,5 +6,6 @@ pub mod ui;
 pub mod cell;
 pub mod geom;
 pub mod event;
+pub mod terminal;
 
 mod macros;

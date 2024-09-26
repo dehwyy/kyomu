@@ -3,11 +3,6 @@ pub mod components;
 use tokio::io::{stdout, Stdout};
 
 
-pub type TerminalSize = (u16, u16);
-pub type TerminalPosition = (u16, u16);
-
-
-
 #[async_trait::async_trait]
 pub trait Renderable: Send {
   async fn render(&mut self, stdout: &mut Stdout);

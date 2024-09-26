@@ -1,5 +1,4 @@
-use crate::core::ui::{TerminalPosition, TerminalSize};
-use crate::core::ui::components::ComponentSize;
+use crate::core::{terminal::{TerminalPosition, TerminalSize}, ui::components::ComponentSize};
 
 #[derive(Clone, Copy)]
 pub enum Align {

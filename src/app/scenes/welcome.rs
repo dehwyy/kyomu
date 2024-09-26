@@ -2,7 +2,9 @@ use std::borrow::BorrowMut;
 
 use tokio::{io::Stdout, sync::broadcast};
 
-use crate::{app::terminal::event::Event, core::ui::{components::{input::Input, Component}, Renderable}};
+use crate::core::ui::{components::{input::Input, Component}, Renderable};
+use crate::core::event::Event;
+
 use crate::boxed;
 
 pub struct WelcomeScene {

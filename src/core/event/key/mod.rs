@@ -6,6 +6,7 @@ pub use key_char::KeyChar;
 use modifier::Modifier;
 use crossterm::event::KeyEvent as CrosstermKeyEvent;
 
+#[derive(Debug, Clone)]
 pub enum Key {
     // Arrows.
     Left,
