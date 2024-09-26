@@ -15,10 +15,19 @@ macro_rules! boxed {
 }
 
 #[macro_export]
-macro_rules! colored {
-    ($color:expr) => {{
-        |s: String| String::from(
-            format!("\x1b[{}m{}\x1b[0m", $color, s)
-        )
+macro_rules! escaped {
+    ($s:expr, $end_char:expr) => {{
+      let join_char = match $end_char.len() {
+        0 => "",
+        _ => ";"
+      };
+
+      format!(
+        "\x1b[{}{}",
+        $s.into_iter()
+          .collect::<Vec<_>>()
+          .join(join_char),
+        $end_char
+      )
     }};
 }

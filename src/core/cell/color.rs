@@ -29,6 +29,11 @@ pub enum Color {
   Rgb(Rgb)
 }
 
+#[derive(Default, Copy, Clone)]
+pub struct FgColor(pub Color);
+#[derive(Copy, Clone)]
+pub struct BgColor(pub Color);
+
 impl Color {
   pub fn to_rgb(&self) -> Rgb {
     match self {

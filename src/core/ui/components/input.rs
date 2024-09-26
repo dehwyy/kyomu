@@ -21,7 +21,7 @@ impl Input {
         ..Default::default()
       },
       rx,
-      value: String::new(),
+      value: String::from(" "),
       placeholder: None
     }
   }
@@ -65,21 +65,20 @@ impl Component for Input {
       }
     }
 
-    print!("\r\x1b[2K");
 
     OutputGroup::new(
-      *OutputGroupFlags::empty().new_lined().clear_line(),
-      vec!(
+      *OutputGroupFlags::empty().clear_line(),
+      Vec::from([
         Output::new(self.get_placeholder())
           .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD | OutputFlags::STRIKETHROUGH)
           .fg_color(Color::Rgb(Rgb::new(200, 40, 120))),
 
-        Output::new(": "),
+        Output::new(":"),
 
         Output::new(self.get_value())
-          .fg_color(Color::Red)
-      ),
-    ).write(stdout).await;
+          .fg_color(Color::Rgb(Rgb::new(230, 100, 240))),
+      ]),
+    ).write(stdout).await.unwrap();
   }
 
   // TODO

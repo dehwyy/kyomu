@@ -1,4 +1,5 @@
-use tokio::io::{AsyncWriteExt, Stdout};
+use tokio::io::{Stdout, AsyncWriteExt, Error as WriteError};
+use crate::core::io::ansi::sequence::{AnsiSequence, AnsiSequenceType};
 
 use super::{flags::OutputGroupFlags, Output};
 
@@ -12,9 +13,22 @@ impl OutputGroup {
     Self { elements, flags }
   }
 
-  pub async fn write(self, stdout: &mut Stdout) {
+  pub async fn write(self, stdout: &mut Stdout) -> Result<(), WriteError> {
+
+    let (begin, end) = AnsiSequence::new(AnsiSequenceType::NotChainable).inject(self.flags).compile();
+    let s = format!("{begin}{end}");
+
+    // println!("{}", s.escape_debug());
+
+    stdout.write_all(s.as_bytes()).await?;
+
     for mut el in self.elements {
-      el.write(stdout).await.unwrap();
+      el.write(stdout).await?;
     }
+
+    stdout.flush().await?;
+
+
+    Ok(())
   }
 }

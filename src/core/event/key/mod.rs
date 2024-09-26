@@ -4,7 +4,7 @@ mod key_char;
 pub use key_char::KeyChar;
 
 use modifier::Modifier;
-use crossterm::event::KeyEvent as CrosstermKeyEvent;
+use crossterm::event::{KeyEvent as CrosstermKeyEvent, KeyEventKind as CrosstermKeyEventKind};
 
 #[derive(Debug, Clone)]
 pub enum Key {
@@ -35,6 +35,11 @@ impl From<CrosstermKeyEvent> for Key {
     use crossterm::event::KeyCode as KC;
 
     // println!("key_ev: {:?}", key_ev);
+
+    if key_ev.kind == CrosstermKeyEventKind::Release {
+      return Self::Null;
+    }
+
     match key_ev.code {
       KC::Left => Self::Left,
       KC::Right => Self::Right,

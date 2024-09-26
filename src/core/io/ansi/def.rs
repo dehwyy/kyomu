@@ -17,8 +17,7 @@ macro_rules! ansidef_function {
 // Global
 ansidef_variable!(RESET, "0");
 ansidef_variable!(NEW_LINE, "\r\n");
-ansidef_variable!(RESET_CARET, "\r");
-ansidef_variable!(CLEAR_LINE, "2k");
+ansidef_variable!(CLEAR_LINE, "2K");
 
 // Style
 ansidef_variable!(BOLD, "1");
@@ -41,3 +40,6 @@ ansidef_variable!(CYAN, "36");
 ansidef_variable!(WHITE, "37");
 ansidef_variable!(RGB, "38");
 ansidef_function!(rgb, (u8, u8, u8, u8), |(start, r, g, b)| vec!(start, 2, r, g, b));
+
+// AnsiEndChar
+ansidef_variable!(END_GRAPHIC, "m");

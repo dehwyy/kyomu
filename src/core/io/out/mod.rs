@@ -5,31 +5,18 @@ use std::fmt::Display;
 
 use tokio::io::{Stdout, AsyncWriteExt, Error as WriteError};
 
-use super::ansi::AnsiSequence;
+use super::ansi::sequence::{AnsiSequence, AnsiSequenceType};
 use flags::OutputFlags;
 
 
-use crate::{boxed, core::cell::color::Color};
+use crate::core::cell::color::{BgColor, Color, FgColor};
 
 
 pub struct Output {
   s: String,
   flags: OutputFlags,
-  fg_color: Color,
-  bg_color: Option<Color>,
-  new_line: bool
-}
-
-impl Default for Output {
-  fn default() -> Self {
-      Self {
-        s: String::new(),
-        flags: OutputFlags::default(),
-        fg_color: Color::default(),
-        bg_color: None,
-        new_line: false
-      }
-  }
+  fg_color: FgColor,
+  bg_color: Option<BgColor>,
 }
 
 
@@ -37,17 +24,19 @@ impl Output {
   pub fn new(s: impl Display) -> Self {
     Self {
       s: s.to_string(),
-      ..Default::default()
+      flags: OutputFlags::empty(),
+      fg_color: FgColor::default(),
+      bg_color: None,
     }
   }
 
   pub fn fg_color(mut self, color: Color) -> Self {
-    self.fg_color = color;
+    self.fg_color = FgColor(color);
     self
   }
 
   pub fn bg_color(mut self, color: Color) -> Self {
-    self.bg_color = Some(color);
+    self.bg_color = Some(BgColor(color));
     self
   }
 
@@ -56,33 +45,19 @@ impl Output {
     self
   }
 
-  pub fn new_lined(mut self) -> Self {
-    self.new_line = true;
-    self
-  }
-
-
   pub async fn write(&mut self, stdout: &mut Stdout) -> Result<(), WriteError> {
-    let mut ansi_sequence = AnsiSequence::new()
-      .inject_flags(self.flags)
-      .inject_fg_color(self.fg_color);
+    let ansi_sequence = AnsiSequence::new(AnsiSequenceType::Graphic)
+      .inject(self.flags)
+      .inject(self.fg_color)
+      .inject_maybe(self.bg_color);
 
-    if let Some(bg_color) = self.bg_color {
-      ansi_sequence = ansi_sequence.inject_bg_color(bg_color);
-    }
+    let s = {
+      let (begin, end) = ansi_sequence.compile();
 
-    if self.new_line {
-      ansi_sequence = ansi_sequence.new_lined();
-    }
-
-    let (ansi_start, ansi_end) = ansi_sequence.compile();
-
-
-    let s = format!("{ansi_start}{s}{ansi_end}", s=self.s);
+      format!("{begin}{}{end}", self.s)
+    };
 
     stdout.write_all(s.as_bytes()).await?;
-
-    stdout.flush().await?;
 
     Ok(())
   }
