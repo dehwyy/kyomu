@@ -61,3 +61,23 @@ impl Default for OutputFlags {
     Self::empty()
   }
 }
+
+bitflags::bitflags! {
+  #[derive(Clone, Copy)]
+  pub struct OutputGroupFlags: u8 {
+    const NEW_LINE = 1;
+    const CLEAR_LINE = 1 << 1;
+  }
+}
+
+impl OutputGroupFlags {
+  pub fn new_lined(&mut self) -> &mut Self {
+    *self |= OutputGroupFlags::NEW_LINE;
+    self
+  }
+
+  pub fn clear_line(&mut self) -> &mut Self {
+    *self |= OutputGroupFlags::CLEAR_LINE;
+    self
+  }
+}

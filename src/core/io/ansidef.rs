@@ -17,6 +17,8 @@ macro_rules! ansidef_function {
 // Global
 ansidef_variable!(RESET, "0");
 ansidef_variable!(NEW_LINE, "\r\n");
+ansidef_variable!(RESET_CARET, "\r");
+ansidef_variable!(CLEAR_LINE, "2k");
 
 // Style
 ansidef_variable!(BOLD, "1");

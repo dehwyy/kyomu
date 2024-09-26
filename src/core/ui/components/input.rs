@@ -1,7 +1,6 @@
-use crossterm::event::KeyCode;
-use tokio::{io::{AsyncWriteExt, Stdout}, sync::broadcast};
+use tokio::io::Stdout;
 
-use crate::core::{cell::color::{Color, Rgb}, event::key::Key, geom::align::Align, io::{out::Output, out_flags::OutputFlags}};
+use crate::core::{cell::color::{Color, Rgb}, event::key::Key, geom::align::Align, io::out::{flags::{self, OutputFlags, OutputGroupFlags}, group::OutputGroup, Output}};
 
 use crate::core::terminal::{Terminal, TerminalSize};
 use crate::core::event::{Event, EventReceiver};
@@ -10,7 +9,7 @@ use super::{Component, ComponentInner};
 
 pub struct Input {
   rx: EventReceiver,
-  value: Option<String>,
+  value: String,
   placeholder: Option<String>,
   inner: ComponentInner
 }
@@ -22,7 +21,7 @@ impl Input {
         ..Default::default()
       },
       rx,
-      value: None,
+      value: String::new(),
       placeholder: None
     }
   }
@@ -32,7 +31,7 @@ impl Input {
   }
 
   fn get_value(&self) -> String {
-    self.value.clone().unwrap_or_default()
+    self.value.clone()
   }
 
   pub fn set_placeholder(&mut self, placeholder: String) -> &mut Self {
@@ -40,8 +39,8 @@ impl Input {
     self
   }
 
-  pub fn set_value<F: Fn(&Option<String>) -> String>(&mut self, callback: F) -> &mut Self {
-    self.value = Some(callback(&self.value));
+  pub fn set_value<F: Fn(String) -> String>(&mut self, callback: F) -> &mut Self {
+    self.value = callback(self.value.clone());
     self
   }
 }
@@ -51,31 +50,42 @@ impl Component for Input {
   async fn render(&mut self, stdout: &mut Stdout) {
     while let Ok(new_event) = self.rx.try_recv() {
       if let Event::Key(key) = new_event {
-        if let Key::Char(c) = key {
-          self.set_value(|v| format!("{}{}", v.clone().unwrap_or_default(), c.ch));
-        }
+        match key {
+          Key::Backspace => {
+            let val_len = self.get_value().len();
+            if val_len > 0 {
+              self.value.remove(self.get_value().len() - 1);
+            }
+          },
+          Key::Char(c) => {
+            self.value.push(c.ch);
+          },
+          _ev => {}
+        };
       }
     }
 
-    Output::new()
-      .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD | OutputFlags::STRIKETHROUGH)
-      .fg_color(Color::Rgb(Rgb::new(200, 40, 120)))
-      // .new_lined()
-      .write(stdout, self.get_placeholder()).await.unwrap();
+    print!("\r\x1b[2K");
 
-    Output::new()
-      .write(stdout, ": ").await.unwrap();
+    OutputGroup::new(
+      *OutputGroupFlags::empty().new_lined().clear_line(),
+      vec!(
+        Output::new(self.get_placeholder())
+          .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD | OutputFlags::STRIKETHROUGH)
+          .fg_color(Color::Rgb(Rgb::new(200, 40, 120))),
 
-    Output::new()
-      .fg_color(Color::Red)
-      .new_lined()
-      .write(stdout, self.get_value()).await.unwrap();
+        Output::new(": "),
+
+        Output::new(self.get_value())
+          .fg_color(Color::Red)
+      ),
+    ).write(stdout).await;
   }
 
   // TODO
   /// Ends componenet lifecycle and returns input value.
   fn destroy(self) {
-    self.value.unwrap_or_default();
+    self.value;
   }
 
   fn align(&mut self, alignment: Align) {

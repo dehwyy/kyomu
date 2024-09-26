@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::core::cell::color::Color;
 
 use super::ansidef as ansi;
-use super::out_flags::OutputFlags;
+use super::out::flags::OutputFlags;
 
 macro_rules! escaped {
     ($s:expr) => {{
