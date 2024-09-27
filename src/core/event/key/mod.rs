@@ -14,8 +14,8 @@ pub enum Key {
     Up,
     Down,
     // Special keys.
-    Backspace,
-    Enter,
+    Backspace(Vec<Modifier>),
+    Enter(Vec<Modifier>),
     Tab,
     ShiftTab,
     Delete,
@@ -40,14 +40,16 @@ impl From<CrosstermKeyEvent> for Key {
       return Self::Null;
     }
 
+    let modifiers = key_ev.modifiers.iter().map(|m| m.into()).collect::<Vec<Modifier>>();
+
     match key_ev.code {
       KC::Left => Self::Left,
       KC::Right => Self::Right,
       KC::Up => Self::Up,
       KC::Down => Self::Down,
 
-      KC::Backspace => Self::Backspace,
-      KC::Enter => Self::Enter,
+      KC::Backspace => Self::Backspace(modifiers),
+      KC::Enter => Self::Enter(modifiers),
       KC::Tab => Self::Tab,
       KC::BackTab => Self::ShiftTab,
 
@@ -56,10 +58,7 @@ impl From<CrosstermKeyEvent> for Key {
 
       KC::F(n) => Self::F(n),
       KC::Char(ch) => Self::Char(
-        KeyChar::new(
-          ch,
-          key_ev.modifiers.iter().map(|m| m.into()).collect()
-        )
+        KeyChar::new(ch, modifiers)
       ),
 
       _ => Self::Null

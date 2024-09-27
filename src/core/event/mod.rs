@@ -42,6 +42,11 @@ impl From<CrosstermEvent> for Event {
       CrosstermEvent::Key(k) => {
         let key_event = Key::from(k);
         match &key_event {
+          Key::Backspace(modifiers) => {
+            // modifiers
+            todo!()
+          }
+
           Key::Char(key_char) => {
             if KeyChar::build('c').ctrl() == *key_char {
               return Self::Quit;

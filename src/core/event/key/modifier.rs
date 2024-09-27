@@ -19,3 +19,25 @@ impl From<CrosstermKeyModifiers> for Modifier {
     }
   }
 }
+
+pub struct Modifiers(Vec<Modifier>);
+
+impl From<CrosstermKeyModifiers> for Modifiers {
+  fn from(crossterm_modifiers: CrosstermKeyModifiers) -> Self {
+    let mut v = vec!();
+
+    if crossterm_modifiers.contains(CrosstermKeyModifiers::CONTROL) {
+      v.push(Modifier::Ctrl)
+    }
+
+    if crossterm_modifiers.contains(CrosstermKeyModifiers::SHIFT) {
+      v.push(Modifier::Shift)
+    }
+
+    if crossterm_modifiers.contains(CrosstermKeyModifiers::ALT) {
+      v.push(Modifier::Alt)
+    }
+
+    Self(v)
+  }
+}

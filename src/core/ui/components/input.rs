@@ -63,7 +63,7 @@ impl Component for Input {
     while let Ok(new_event) = self.rx.try_recv() {
       if let Event::Key(key) = new_event {
         match key {
-          Key::Backspace => {
+          Key::Backspace(_) => {
             let val_len = self.get_value().len();
             if val_len > 0 {
               // self.set_value(self.value[0..val_len - 1].to_string());
