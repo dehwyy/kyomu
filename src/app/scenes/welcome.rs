@@ -5,7 +5,10 @@ use tokio::{io::Stdout, sync::broadcast};
 use crate::core::event::{Event, EventReceiver};
 use crate::core::ui::components::ComponentRenderOutput;
 use crate::core::ui::{
-    components::{input::Input, Component},
+    components::{
+        input::{Input, InputBuilder},
+        Component,
+    },
     Renderable,
 };
 
@@ -16,7 +19,7 @@ struct WelcomeComponents {
 impl WelcomeComponents {
     fn new(rx: EventReceiver) -> Self {
         Self {
-            input: Input::new(rx).set_placeholder("Enter your name:"),
+            input: InputBuilder::new().build(rx),
         }
     }
 }

@@ -6,10 +6,13 @@ use crate::core::{
     cell::color::{Color, Rgb},
     event::key::Key,
     geom::align::Align,
-    io::out::{
-        flags::{self, OutputFlags, OutputGroupFlags},
-        group::OutputGroup,
-        Output,
+    io::{
+        out::{
+            flags::{self, OutputFlags, OutputGroupFlags},
+            group::OutputGroup,
+            Output,
+        },
+        text_decor::TextDecoration,
     },
 };
 
@@ -18,33 +21,82 @@ use crate::core::terminal::{Terminal, TerminalSize};
 
 use super::{Component, ComponentInner, ComponentRenderOutput, ComponentSize};
 
-pub struct Input {
-    rx: EventReceiver,
-    value: String,
+pub struct InputBuilder {
     placeholder: String,
-    inner: ComponentInner,
+    placeholder_decor: TextDecoration,
+
+    value: String,
+    value_decor: TextDecoration,
 }
 
-impl Input {
-    pub fn new(rx: EventReceiver) -> Self {
+impl Default for InputBuilder {
+    fn default() -> Self {
         Self {
-            rx,
-            value: String::from(" "),
             placeholder: String::from("Input"),
+            placeholder_decor: TextDecoration::build()
+                .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
+                .fg_color(Color::Rgb(Rgb::new(230, 100, 240))),
+
+            value: String::from(" "),
+            value_decor: TextDecoration::build().fg_color(Color::Blue),
+        }
+    }
+}
+
+impl InputBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_placeholder(mut self, placeholder: impl Display) -> Self {
+        self.placeholder = placeholder.to_string();
+        self
+    }
+
+    pub fn with_placeholder_decor(mut self, placeholder_decor: TextDecoration) -> Self {
+        self.placeholder_decor = placeholder_decor;
+        self
+    }
+
+    pub fn with_default_value(mut self, value: impl Display) -> Self {
+        self.value = value.to_string();
+        self
+    }
+
+    pub fn with_input_value_decor(mut self, value_decor: TextDecoration) -> Self {
+        self.value_decor = value_decor;
+        self
+    }
+
+    pub fn build(self, rx: EventReceiver) -> Input {
+        Input {
+            rx,
             inner: ComponentInner {
                 ..Default::default()
             },
+            placeholder: self.placeholder,
+            placeholder_decor: self.placeholder_decor,
+            value: self.value,
+            value_decor: self.value_decor,
         }
     }
+}
 
-    fn get_placeholder(&self) -> String {
-        self.placeholder.clone()
-    }
+pub struct Input {
+    // Inner
+    rx: EventReceiver,
+    inner: ComponentInner,
 
-    fn get_value(&self) -> String {
-        self.value.clone()
-    }
+    // Appearance
+    placeholder_decor: TextDecoration,
+    value_decor: TextDecoration,
 
+    // Data
+    value: String,
+    placeholder: String,
+}
+
+impl Input {
     fn get_extra_label(&self) -> String {
         format!(" {:2?}:", self.get_input_size())
     }
@@ -59,16 +111,6 @@ impl Input {
 
         self.value.trim().to_string()
     }
-
-    pub fn set_placeholder(mut self, placeholder: impl Display) -> Self {
-        self.placeholder = placeholder.to_string();
-        self
-    }
-
-    pub fn set_value(mut self, value: impl Display) -> Self {
-        self.value = value.to_string();
-        self
-    }
 }
 
 #[async_trait::async_trait]
@@ -78,14 +120,12 @@ impl Component<(), String> for Input {
             if let Event::Key(key) = new_event {
                 match key {
                     Key::Backspace(_) => {
-                        let val_len = self.get_value().len();
+                        let val_len = self.value.len();
                         if val_len > 0 {
-                            // self.set_value(self.value[0..val_len - 1].to_string());
-                            self.value.remove(self.get_value().len() - 1);
+                            self.value.remove(self.value.len() - 1);
                         }
                     }
                     Key::Char(c) => {
-                        // self.set_value(format!("{}{}", self.get_value(), c.ch));
                         self.value.push(c.ch);
                     }
                     // Destroy component
@@ -98,11 +138,8 @@ impl Component<(), String> for Input {
         }
 
         let mut output_group = Vec::from([
-            Output::new(self.get_placeholder())
-                .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
-                .fg_color(Color::Rgb(Rgb::new(230, 100, 240)))
-                .bg_color(Color::Blue),
-            Output::new(self.get_value()).fg_color(Color::Rgb(Rgb::new(230, 100, 240))),
+            Output::from(self.placeholder_decor).value(&self.placeholder),
+            Output::from(self.value_decor).value(&self.value),
         ]);
 
         // TODO: debug mode
