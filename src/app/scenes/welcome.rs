@@ -1,6 +1,6 @@
-use crate::core::io::ansi::def as ansi;
+use crate::core::ui::render_flags::RenderFlags;
 
-use tokio::{io::Stdout, sync::broadcast};
+use tokio::io::Stdout;
 
 use crate::core::cell::color::Color;
 use crate::core::event::{Event, EventReceiver};
@@ -8,6 +8,7 @@ use crate::core::io::out::flags::OutputFlags;
 use crate::core::io::text_decor::TextDecoration;
 use crate::core::ui::components::text::{Text, TextBuilder, TextPart};
 use crate::core::ui::components::ComponentRenderOutput;
+use crate::core::ui::Scene;
 use crate::core::ui::{
     components::{
         input::{Input, InputBuilder},
@@ -15,7 +16,6 @@ use crate::core::ui::{
     },
     Renderable,
 };
-use crate::core::ui::{RawAnsi, Scene};
 
 struct WelcomeComponents {
     input: Input,
@@ -75,17 +75,13 @@ impl Renderable for WelcomeScene {
             1 => self.render_stage_1(stdout).await,
             _ => {}
         };
-        //   if let Some(mut c) = self.components.get_mut(self.stage) {
-        //     c.render(stdout).await;
-        //   }
-        // }
     }
 }
 
 #[async_trait::async_trait]
 impl Scene for WelcomeScene {
     async fn prerender_once(&mut self, stdout: &mut Stdout) {
-        RawAnsi::new(&[ansi::CLEAR_SCREEN, ansi::CURSOR_HOME])
+        (RenderFlags::CURSOR_HOME | RenderFlags::CLEAR_SCREEN)
             .render(stdout)
             .await;
     }

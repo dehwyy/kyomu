@@ -18,6 +18,7 @@ macro_rules! ansidef_function {
 // Global
 ansidef_variable!(RESET, "0");
 ansidef_variable!(NEW_LINE, "\r\n");
+ansidef_variable!(CARET_RESET, "\r");
 ansidef_variable!(CLEAR_LINE, "2K");
 ansidef_variable!(CLEAR_SCREEN, "2J");
 ansidef_variable!(CURSOR_HOME, "H");
