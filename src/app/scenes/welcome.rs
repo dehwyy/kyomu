@@ -2,7 +2,11 @@ use std::borrow::BorrowMut;
 
 use tokio::{io::Stdout, sync::broadcast};
 
+use crate::core::cell::color::Color;
 use crate::core::event::{Event, EventReceiver};
+use crate::core::io::out::flags::OutputFlags;
+use crate::core::io::text_decor::TextDecoration;
+use crate::core::ui::components::text::{Text, TextBuilder, TextPart};
 use crate::core::ui::components::ComponentRenderOutput;
 use crate::core::ui::{
     components::{
@@ -41,7 +45,22 @@ impl WelcomeScene {
         match self.components.input.try_render(stdout).await {
             ComponentRenderOutput::Destroyed(input_value) => {
                 self.stage += 1;
-                println!("Hello, {input_value}!");
+                TextBuilder::new()
+                    .add_part(
+                        TextPart::new("Hello").decor(
+                            TextDecoration::new()
+                                .fg_color(Color::Red)
+                                .flags(OutputFlags::STRIKETHROUGH),
+                        ),
+                    )
+                    .add_part(TextPart::new(", "))
+                    .add_part(
+                        TextPart::new(&format!("{input_value}!"))
+                            .decor(TextDecoration::new().fg_color(Color::Green)),
+                    )
+                    .build()
+                    .try_render(stdout)
+                    .await;
             }
             ComponentRenderOutput::Rendered(_) => {}
         }

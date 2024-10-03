@@ -1,4 +1,5 @@
 pub mod input;
+pub mod text;
 
 use tokio::io::Stdout;
 
