@@ -32,13 +32,13 @@ pub struct InputBuilder {
 impl Default for InputBuilder {
     fn default() -> Self {
         Self {
-            placeholder: String::from("Input"),
-            placeholder_decor: TextDecoration::build()
+            placeholder: String::from("Input:"),
+            placeholder_decor: TextDecoration::new()
                 .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
                 .fg_color(Color::Rgb(Rgb::new(230, 100, 240))),
 
             value: String::from(" "),
-            value_decor: TextDecoration::build().fg_color(Color::Blue),
+            value_decor: TextDecoration::new().fg_color(Color::Blue),
         }
     }
 }
@@ -106,9 +106,6 @@ impl Input {
     }
 
     async fn destroy(&mut self, stdout: &mut Stdout) -> String {
-        stdout.write_all(b"\n").await.unwrap();
-        stdout.flush().await.unwrap();
-
         self.value.trim().to_string()
     }
 }

@@ -9,7 +9,7 @@ pub struct TextDecoration {
 }
 
 impl TextDecoration {
-    pub fn build() -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
 
