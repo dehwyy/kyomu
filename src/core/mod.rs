@@ -1,11 +1,10 @@
-pub mod random;
-pub mod math;
-pub mod io;
-pub mod io2; // should be removed ☹️
-pub mod ui;
 pub mod cell;
-pub mod geom;
 pub mod event;
+pub mod geom;
+pub mod io;
+pub mod math;
+pub mod random;
 pub mod terminal;
+pub mod ui;
 
 mod macros;

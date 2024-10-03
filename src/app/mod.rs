@@ -1,9 +1,5 @@
-pub mod mods;
-pub mod scenarios;
 pub mod pastas;
 pub mod scenes;
-
-mod settings;
 
 // maybe u8 is better here
 pub type MaxGameLength = u16;
