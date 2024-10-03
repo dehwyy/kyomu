@@ -1,3 +1,7 @@
 ## Kyomu
 
-Always on my own.
+
+## How to run?
+```sh
+cargo run
+```
