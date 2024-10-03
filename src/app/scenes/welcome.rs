@@ -1,4 +1,4 @@
-use std::borrow::BorrowMut;
+use crate::core::io::ansi::def as ansi;
 
 use tokio::{io::Stdout, sync::broadcast};
 
@@ -15,6 +15,7 @@ use crate::core::ui::{
     },
     Renderable,
 };
+use crate::core::ui::{RawAnsi, Scene};
 
 struct WelcomeComponents {
     input: Input,
@@ -78,5 +79,14 @@ impl Renderable for WelcomeScene {
         //     c.render(stdout).await;
         //   }
         // }
+    }
+}
+
+#[async_trait::async_trait]
+impl Scene for WelcomeScene {
+    async fn prerender_once(&mut self, stdout: &mut Stdout) {
+        RawAnsi::new(&[ansi::CLEAR_SCREEN, ansi::CURSOR_HOME])
+            .render(stdout)
+            .await;
     }
 }

@@ -1,15 +1,16 @@
 macro_rules! ansidef_variable {
-  ($var:ident, $val:literal) => {
-    pub(super) const $var: &str = $val;
-
-  }
+    ($var:ident, $val:literal) => {
+        pub const $var: &str = $val;
+    };
 }
-
 
 macro_rules! ansidef_function {
     ($var:ident, $fn_args:tt, $fn:expr) => {
         pub fn $var(args: $fn_args) -> Vec<String> {
-          $fn(args).into_iter().map(|s| s.to_string()).collect::<Vec<_>>()
+            $fn(args)
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
         }
     };
 }
@@ -18,6 +19,8 @@ macro_rules! ansidef_function {
 ansidef_variable!(RESET, "0");
 ansidef_variable!(NEW_LINE, "\r\n");
 ansidef_variable!(CLEAR_LINE, "2K");
+ansidef_variable!(CLEAR_SCREEN, "2J");
+ansidef_variable!(CURSOR_HOME, "H");
 
 // Style
 ansidef_variable!(BOLD, "1");
@@ -39,7 +42,9 @@ ansidef_variable!(MAGENTA, "35");
 ansidef_variable!(CYAN, "36");
 ansidef_variable!(WHITE, "37");
 ansidef_variable!(RGB, "38");
-ansidef_function!(rgb, (u8, u8, u8, u8), |(start, r, g, b)| vec!(start, 2, r, g, b));
+ansidef_function!(rgb, (u8, u8, u8, u8), |(start, r, g, b)| vec!(
+    start, 2, r, g, b
+));
 
 // AnsiEndChar
 ansidef_variable!(END_GRAPHIC, "m");

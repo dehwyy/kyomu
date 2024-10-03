@@ -26,7 +26,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (tx, rx) = broadcast::channel::<Event>(32);
     let mut ui = Ui::new();
 
-    ui.set_scene(scenes::WelcomeScene::new(tx.subscribe()));
+    ui.set_scene(scenes::WelcomeScene::new(tx.subscribe()))
+        .await;
 
     let mut t = Terminal::new(rx, ui);
 

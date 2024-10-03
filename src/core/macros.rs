@@ -17,17 +17,19 @@ macro_rules! boxed {
 #[macro_export]
 macro_rules! escaped {
     ($s:expr, $end_char:expr) => {{
-      let join_char = match $end_char.len() {
-        0 => "",
-        _ => ";"
-      };
+        let join_char = match $end_char.len() {
+            0 => "",
+            _ => ";",
+        };
 
-      format!(
-        "\x1b[{}{}",
-        $s.into_iter()
-          .collect::<Vec<_>>()
-          .join(join_char),
-        $end_char
-      )
+        format!(
+            "\x1b[{}{}",
+            $s.into_iter().collect::<Vec<_>>().join(join_char),
+            $end_char
+        )
+    }};
+
+    ($s:expr) => {{
+        escaped!($s, "")
     }};
 }
