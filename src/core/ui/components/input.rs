@@ -48,22 +48,22 @@ impl InputBuilder {
         Self::default()
     }
 
-    pub fn with_placeholder(mut self, placeholder: impl Display) -> Self {
+    pub fn placeholder(mut self, placeholder: impl Display) -> Self {
         self.placeholder = placeholder.to_string();
         self
     }
 
-    pub fn with_placeholder_decor(mut self, placeholder_decor: TextDecoration) -> Self {
+    pub fn placeholder_decor(mut self, placeholder_decor: TextDecoration) -> Self {
         self.placeholder_decor = placeholder_decor;
         self
     }
 
-    pub fn with_default_value(mut self, value: impl Display) -> Self {
+    pub fn default_value(mut self, value: impl Display) -> Self {
         self.value = value.to_string();
         self
     }
 
-    pub fn with_input_value_decor(mut self, value_decor: TextDecoration) -> Self {
+    pub fn input_value_decor(mut self, value_decor: TextDecoration) -> Self {
         self.value_decor = value_decor;
         self
     }
