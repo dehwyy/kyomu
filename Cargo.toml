@@ -1,22 +1,22 @@
 [package]
+edition = "2021"
 name = "kyomu"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
-rand = "0.8.5"
+async-trait = "0.1.82"
+bitflags = "2.6.0"
 dialoguer = "0.11.0"
 eval = "0.4.0"
-serde = {version = "1.0", features = ["derive"]}
-serde_json = { version = "1.0"}
 futures = {version = "0.3.21"}
-bitflags = "2.6.0"
-async-trait = "0.1.82"
+rand = "0.8.5"
+serde = {version = "1.0", features = ["derive"]}
+serde_json = {version = "1.0"}
 
 [dependencies.crossterm]
-version = "0.28.0"
 features = ["event-stream"]
+version = "0.28.0"
 
 [dependencies.tokio]
-version = "1.40.0"
 features = ["macros", "io-std", "io-util", "time", "sync", "rt-multi-thread", "process"]
+version = "1.40.0"

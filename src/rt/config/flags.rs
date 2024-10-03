@@ -1,6 +1,5 @@
 use bitflags::bitflags;
 
-
 bitflags! {
     #[derive(Clone, Copy)]
     pub struct RuntimeFlags: u8 {

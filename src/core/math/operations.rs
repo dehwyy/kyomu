@@ -1,10 +1,10 @@
-use std::fmt::{Formatter, Display, self};
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Copy, Clone)]
 pub enum MathOperation {
     Add,
     Subtract,
-    Multiply
+    Multiply,
 }
 
 impl Display for MathOperation {
@@ -32,7 +32,7 @@ impl MathOperation {
         match self {
             MathOperation::Add => a + b,
             MathOperation::Subtract => a - b,
-            MathOperation::Multiply => a * b
+            MathOperation::Multiply => a * b,
         }
     }
 }
