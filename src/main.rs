@@ -1,17 +1,17 @@
-mod core;
 mod app;
+mod core;
 mod rt;
 
+use app::scenes;
 use core::event::Event;
 use core::terminal::Terminal;
 use core::ui::Ui;
-use app::scenes;
 use rt::config::RuntimeConfig;
 
-use tokio::time::{Instant, interval};
-use tokio::sync::broadcast;
+use futures::{select, FutureExt};
 use std::process::exit;
-use futures::{FutureExt, select};
+use tokio::sync::broadcast;
+use tokio::time::{interval, Instant};
 
 use crossterm::{event::EventStream, terminal::enable_raw_mode};
 
@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     enable_raw_mode()?;
 
-    let mut event_reader = EventStream::new();
+    // let mut event_reader = EventStream::new();
 
     let (tx, rx) = broadcast::channel::<Event>(32);
     let mut ui = Ui::new();
@@ -48,10 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
             }
 
-            tokio::join!(
-                t.render(),
-                interval.tick()
-            );
+            tokio::join!(t.render(), interval.tick());
 
             _frames_rendered += 1
         }
