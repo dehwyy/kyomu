@@ -4,7 +4,7 @@ use tokio::io::{AsyncWriteExt, Stdout};
 
 use crate::core::{
     cell::color::{Color, Rgb},
-    event::key::Key,
+    event::key::{Key, KeyChar},
     geom::align::Align,
     io::{
         out::{
@@ -116,6 +116,7 @@ impl Component<(), String> for Input {
         while let Ok(new_event) = self.rx.try_recv() {
             if let Event::Key(key) = new_event {
                 match key {
+                    // Backspace
                     Key::Backspace(_) => {
                         let val_len = self.value.len();
                         if val_len > 0 {
@@ -123,12 +124,18 @@ impl Component<(), String> for Input {
                         }
                     }
                     Key::Char(c) => {
-                        self.value.push(c.ch);
+                        // CTRL + W
+                        if c == KeyChar::build('w').ctrl() {
+                            self.value = String::from(" ");
+                        } else {
+                            self.value.push(c.ch);
+                        }
                     }
-                    // Destroy component
+                    // Enter -> Destroy component
                     Key::Enter(_) => {
                         return ComponentRenderOutput::Destroyed(self.destroy(stdout).await);
                     }
+                    // TODO: handle
                     _ev => {}
                 };
             }
