@@ -2,19 +2,22 @@ use std::fmt::Display;
 
 use tokio::io::{AsyncWriteExt, Stdout};
 
-use crate::core::{
-    cell::color::{Color, Rgb},
-    event::key::{Key, KeyChar},
-    geom::align::Align,
-    io::{
-        ansi,
-        out::{
-            flags::{self, OutputFlags, OutputGroupFlags},
-            group::OutputGroup,
-            Output,
+use crate::{
+    core::{
+        cell::color::{Color, Rgb},
+        event::key::{Key, KeyChar},
+        geom::align::Align,
+        io::{
+            ansi,
+            out::{
+                flags::{self, OutputFlags, OutputGroupFlags},
+                group::OutputGroup,
+                Output,
+            },
+            text_decor::TextDecoration,
         },
-        text_decor::TextDecoration,
     },
+    rt::get_rt_config,
 };
 
 use crate::core::event::{Event, EventReceiver};
@@ -123,6 +126,23 @@ impl Input {
 #[async_trait::async_trait]
 impl Component<(), String> for Input {
     async fn try_render(&mut self, stdout: &mut Stdout) -> ComponentRenderOutput<(), String> {
+        let mut text_builder = TextBuilder::new()
+            .add_part(TextPart::new(&self.placeholder).decor(self.placeholder_decor));
+
+        let is_debug = get_rt_config().read().await.get_flags().is_debug();
+        if is_debug {
+            text_builder = text_builder.add_part(
+                TextPart::new(&self.get_extra_label())
+                    .decor(TextDecoration::new().flags(OutputFlags::new().italic())),
+            );
+        }
+
+        text_builder
+            .add_part(TextPart::new(&self.value).decor(self.value_decor))
+            .build()
+            .try_render(stdout)
+            .await;
+
         while let Ok(new_event) = self.rx.try_recv() {
             if let Event::Key(key) = new_event {
                 match key {
@@ -150,24 +170,6 @@ impl Component<(), String> for Input {
                 };
             }
         }
-
-        let mut text_builder = TextBuilder::new()
-            .add_part(TextPart::new(&self.placeholder).decor(self.placeholder_decor));
-
-        let is_debug = true;
-        if is_debug {
-            text_builder = text_builder.add_part(
-                TextPart::new(&self.get_extra_label())
-                    .decor(TextDecoration::new().flags(OutputFlags::new().italic())),
-            );
-        }
-
-        text_builder
-            .add_part(TextPart::new(&self.value).decor(self.value_decor))
-            .flags(OutputGroupFlags::empty().clear_line())
-            .build()
-            .try_render(stdout)
-            .await;
 
         ComponentRenderOutput::Rendered(())
     }
