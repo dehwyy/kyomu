@@ -82,12 +82,12 @@ impl Ansiable for OutputGroupFlags {
     fn to_ansi(self) -> Vec<String> {
         let mut v = vec![];
 
-        if self.contains(OutputGroupFlags::NEW_LINE) {
-            v.push(ansi::NEW_LINE);
-        }
-
         if self.contains(OutputGroupFlags::CLEAR_LINE) {
             v.extend([ansi::CARET_RESET, ansi::CLEAR_LINE]);
+        }
+
+        if self.contains(OutputGroupFlags::NEW_LINE) {
+            v.push(ansi::NEW_LINE);
         }
 
         v.iter().map(|s| s.to_string()).collect()

@@ -5,11 +5,27 @@ use crate::core::io::ansi::sequence::{AnsiSequence, AnsiSequenceType};
 use super::Renderable;
 
 bitflags::bitflags! {
-  #[derive(Clone, Copy)]
+  #[derive(Default, Clone, Copy)]
   pub struct RenderFlags: u8 {
     const CLEAR_SCREEN = 1;
     const CURSOR_HOME = 1 << 1;
   }
+}
+
+impl RenderFlags {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn clear_screen(&mut self) -> &mut Self {
+        *self |= RenderFlags::CLEAR_SCREEN;
+        self
+    }
+
+    pub fn cursor_home(&mut self) -> &mut Self {
+        *self |= RenderFlags::CURSOR_HOME;
+        self
+    }
 }
 
 #[async_trait::async_trait]

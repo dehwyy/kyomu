@@ -154,10 +154,8 @@ impl Component<(), String> for Input {
         let mut text_builder = TextBuilder::new()
             .add_part(TextPart::new(&self.placeholder).decor(self.placeholder_decor));
 
-        // TODO: debug mode
-        let is_debug = false;
+        let is_debug = true;
         if is_debug {
-            output_group.push(Output::new(self.get_extra_label()));
             text_builder = text_builder.add_part(
                 TextPart::new(&self.get_extra_label())
                     .decor(TextDecoration::new().flags(OutputFlags::new().italic())),
@@ -166,6 +164,7 @@ impl Component<(), String> for Input {
 
         text_builder
             .add_part(TextPart::new(&self.value).decor(self.value_decor))
+            .flags(OutputGroupFlags::empty().clear_line())
             .build()
             .try_render(stdout)
             .await;
