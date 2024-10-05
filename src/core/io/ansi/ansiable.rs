@@ -106,6 +106,14 @@ impl Ansiable for RenderFlags {
             v.push(ansi::CURSOR_HOME);
         }
 
+        if self.contains(RenderFlags::CURSOR_HIDE) {
+            v.push(ansi::CURSOR_HIDE);
+        }
+
+        if self.contains(RenderFlags::CURSOR_SHOW) {
+            v.push(ansi::CURSOR_SHOW);
+        }
+
         v.iter().map(|s| s.to_string()).collect()
     }
 }

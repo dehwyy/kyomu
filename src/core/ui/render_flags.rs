@@ -9,6 +9,8 @@ bitflags::bitflags! {
   pub struct RenderFlags: u8 {
     const CLEAR_SCREEN = 1;
     const CURSOR_HOME = 1 << 1;
+    const CURSOR_HIDE = 1 << 2;
+    const CURSOR_SHOW = 1 << 3;
   }
 }
 
@@ -17,13 +19,18 @@ impl RenderFlags {
         Self::default()
     }
 
-    pub fn clear_screen(&mut self) -> &mut Self {
-        *self |= RenderFlags::CLEAR_SCREEN;
+    pub fn clear_screen(mut self) -> Self {
+        self |= RenderFlags::CLEAR_SCREEN;
         self
     }
 
-    pub fn cursor_home(&mut self) -> &mut Self {
-        *self |= RenderFlags::CURSOR_HOME;
+    pub fn cursor_home(mut self) -> Self {
+        self |= RenderFlags::CURSOR_HOME;
+        self
+    }
+
+    pub fn cursor_hide(mut self) -> Self {
+        self |= RenderFlags::CURSOR_HIDE;
         self
     }
 }
