@@ -1,15 +1,17 @@
 use tokio::io::Stdout;
 
 use crate::core::{
+    event::EventReceiver,
     geom::align::Align,
     io::{
+        ansi,
         out::{flags::OutputGroupFlags, group::OutputGroup, Output},
         text_decor::TextDecoration,
     },
     terminal::Terminal,
 };
 
-use super::{Component, ComponentInner, ComponentRenderOutput};
+use super::{Component, ComponentInner, ComponentRenderOutput, StaticComponent};
 
 #[derive(Default)]
 pub struct TextPart {
@@ -23,6 +25,10 @@ impl TextPart {
             text: s.as_ref().to_string(),
             decor: TextDecoration::default(),
         }
+    }
+
+    pub fn newln(s: impl AsRef<str>) -> Self {
+        Self::new(format!("{s}{ln}", s = s.as_ref(), ln = ansi::def::NEW_LINE))
     }
 
     pub fn decor(mut self, decor: TextDecoration) -> Self {
@@ -80,9 +86,22 @@ pub struct Text {
     parts: Vec<TextPart>,
 }
 
+impl Component for Text {
+    fn get_size(&self) -> (u16, u16) {
+        self.parts.iter().fold((0, 0), |acc, p| {
+            let (w, h) = p.get_size();
+            (acc.0 + w, acc.1.max(h))
+        })
+    }
+
+    fn align(&mut self, alignment: Align) {
+        self.inner.pos = alignment.get_offset(Terminal::get_size(), self.get_size());
+    }
+}
+
 #[async_trait::async_trait]
-impl Component<(), ()> for Text {
-    async fn try_render(&mut self, stdout: &mut Stdout) -> ComponentRenderOutput<(), ()> {
+impl StaticComponent for Text {
+    async fn render(&mut self, stdout: &mut Stdout) {
         OutputGroup::new(
             self.flags,
             self.parts
@@ -93,18 +112,5 @@ impl Component<(), ()> for Text {
         .write(stdout)
         .await
         .unwrap();
-
-        ComponentRenderOutput::Destroyed(())
-    }
-
-    fn get_size(&self) -> (u16, u16) {
-        self.parts.iter().fold((0, 0), |acc, p| {
-            let (w, h) = p.get_size();
-            (acc.0 + w, acc.1.max(h))
-        })
-    }
-
-    fn align(&mut self, alignment: Align) {
-        self.inner.pos = alignment.get_offset(Terminal::get_size(), self.get_size());
     }
 }

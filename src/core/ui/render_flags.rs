@@ -33,6 +33,11 @@ impl RenderFlags {
         self |= RenderFlags::CURSOR_HIDE;
         self
     }
+
+    pub fn cursor_show(mut self) -> Self {
+        self |= RenderFlags::CURSOR_SHOW;
+        self
+    }
 }
 
 #[async_trait::async_trait]

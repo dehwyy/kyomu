@@ -25,29 +25,17 @@ use crate::core::terminal::{Terminal, TerminalSize};
 
 use super::{
     text::{TextBuilder, TextPart},
-    Component, ComponentInner, ComponentRenderOutput, ComponentSize,
+    Component, ComponentInner, ComponentRenderOutput, ComponentSize, DynamicComponent,
+    StaticComponent,
 };
 
+#[derive(Default)]
 pub struct InputBuilder {
     placeholder: String,
     placeholder_decor: TextDecoration,
 
     value: String,
     value_decor: TextDecoration,
-}
-
-impl Default for InputBuilder {
-    fn default() -> Self {
-        Self {
-            placeholder: String::from("Input:"),
-            placeholder_decor: TextDecoration::new()
-                .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
-                .fg_color(Color::Rgb(230, 100, 240)),
-
-            value: String::from(" "),
-            value_decor: TextDecoration::new().fg_color(Color::Blue),
-        }
-    }
 }
 
 impl InputBuilder {
@@ -75,9 +63,8 @@ impl InputBuilder {
         self
     }
 
-    pub fn build(self, rx: EventReceiver) -> Input {
+    pub fn build(self) -> Input {
         Input {
-            rx,
             inner: ComponentInner {
                 ..Default::default()
             },
@@ -91,7 +78,6 @@ impl InputBuilder {
 
 pub struct Input {
     // Inner
-    rx: EventReceiver,
     inner: ComponentInner,
 
     // Appearance
@@ -113,19 +99,28 @@ impl Input {
     }
 
     async fn destroy(&mut self, stdout: &mut Stdout) -> String {
-        TextBuilder::new()
-            .add_part(TextPart::new(ansi::def::NEW_LINE))
-            .build()
-            .try_render(stdout)
-            .await;
-
         self.value.trim().to_string()
     }
 }
 
+impl Component for Input {
+    fn get_size(&self) -> ComponentSize {
+        let (w, h) = self.get_input_size();
+        (w + self.get_extra_label().len() as u16, h)
+    }
+
+    fn align(&mut self, alignment: Align) {
+        self.inner.pos = alignment.get_offset(Terminal::get_size(), self.get_size());
+    }
+}
+
 #[async_trait::async_trait]
-impl Component<(), String> for Input {
-    async fn try_render(&mut self, stdout: &mut Stdout) -> ComponentRenderOutput<(), String> {
+impl DynamicComponent<(), String> for Input {
+    async fn try_render(
+        &mut self,
+        rx: &mut EventReceiver,
+        stdout: &mut Stdout,
+    ) -> ComponentRenderOutput<(), String> {
         let mut text_builder = TextBuilder::new()
             .add_part(TextPart::new(&self.placeholder).decor(self.placeholder_decor));
 
@@ -140,10 +135,10 @@ impl Component<(), String> for Input {
         text_builder
             .add_part(TextPart::new(&self.value).decor(self.value_decor))
             .build()
-            .try_render(stdout)
+            .render(stdout)
             .await;
 
-        while let Ok(new_event) = self.rx.try_recv() {
+        while let Ok(new_event) = rx.try_recv() {
             if let Event::Key(key) = new_event {
                 match key {
                     // Backspace
@@ -172,14 +167,5 @@ impl Component<(), String> for Input {
         }
 
         ComponentRenderOutput::Rendered(())
-    }
-
-    fn get_size(&self) -> ComponentSize {
-        let (w, h) = self.get_input_size();
-        (w + self.get_extra_label().len() as u16, h)
-    }
-
-    fn align(&mut self, alignment: Align) {
-        self.inner.pos = alignment.get_offset(Terminal::get_size(), self.get_size());
     }
 }
