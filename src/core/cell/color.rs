@@ -23,10 +23,14 @@ impl Rgb {
 pub enum Color {
     #[default]
     White,
+    Black,
     Red,
     Green,
+    Yellow,
+    Magenta,
+    Cyan,
     Blue,
-    Rgb(Rgb),
+    Rgb(u8, u8, u8),
 }
 
 #[derive(Default, Copy, Clone)]
@@ -41,7 +45,11 @@ impl Color {
             Self::Red => Rgb(255, 0, 0),
             Self::Green => Rgb(0, 255, 0),
             Self::Blue => Rgb(0, 0, 255),
-            Self::Rgb(rgb_color) => *rgb_color,
+            Self::Yellow => Rgb(255, 255, 0),
+            Self::Cyan => Rgb(0, 255, 255),
+            Self::Magenta => Rgb(255, 0, 255),
+            Self::Black => Rgb(0, 0, 0),
+            Self::Rgb(r, g, b) => Rgb(*r, *g, *b),
         }
     }
 }

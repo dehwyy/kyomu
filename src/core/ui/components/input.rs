@@ -42,7 +42,7 @@ impl Default for InputBuilder {
             placeholder: String::from("Input:"),
             placeholder_decor: TextDecoration::new()
                 .flags(OutputFlags::UNDERLINE | OutputFlags::BOLD)
-                .fg_color(Color::Rgb(Rgb::new(230, 100, 240))),
+                .fg_color(Color::Rgb(230, 100, 240)),
 
             value: String::from(" "),
             value_decor: TextDecoration::new().fg_color(Color::Blue),
