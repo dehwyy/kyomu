@@ -29,6 +29,19 @@ pub enum Key {
     Null,
 }
 
+impl Key {
+    pub fn vim(mut self) -> Self {
+        match self {
+            Self::Char(c) => match c.ch {
+                'k' => Self::Up,
+                'j' => Self::Down,
+                _ => Self::Char(c),
+            },
+            _ => self,
+        }
+    }
+}
+
 impl From<CrosstermKeyEvent> for Key {
     fn from(key_ev: CrosstermKeyEvent) -> Self {
         use crossterm::event::KeyCode as KC;
