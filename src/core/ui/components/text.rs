@@ -34,10 +34,18 @@ impl TextPart {
         (self.text.len() as u16, 1)
     }
 }
-
-#[derive(Default)]
 pub struct TextBuilder {
+    flags: OutputGroupFlags,
     parts: Vec<TextPart>,
+}
+
+impl Default for TextBuilder {
+    fn default() -> Self {
+        Self {
+            flags: OutputGroupFlags::empty(),
+            parts: Vec::new(),
+        }
+    }
 }
 
 impl TextBuilder {
@@ -50,9 +58,15 @@ impl TextBuilder {
         self
     }
 
+    pub fn flags(mut self, flags: OutputGroupFlags) -> Self {
+        self.flags = flags;
+        self
+    }
+
     pub fn build(self) -> Text {
         Text {
             inner: ComponentInner::default(),
+            flags: self.flags,
             parts: self.parts,
         }
     }
@@ -62,6 +76,7 @@ pub struct Text {
     // Inner
     inner: ComponentInner,
 
+    flags: OutputGroupFlags,
     parts: Vec<TextPart>,
 }
 
@@ -69,7 +84,7 @@ pub struct Text {
 impl Component<(), ()> for Text {
     async fn try_render(&mut self, stdout: &mut Stdout) -> ComponentRenderOutput<(), ()> {
         OutputGroup::new(
-            *OutputGroupFlags::empty().new_line(),
+            self.flags,
             self.parts
                 .iter()
                 .map(|p| Output::from(p.decor).value(&p.text))
