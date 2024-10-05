@@ -44,6 +44,11 @@ impl WelcomeComponents {
                     SelectChoice::new("SnakeGame")
                         .decor(TextDecoration::new().fg_color(Color::Yellow)),
                 )
+                .add_option(
+                    SelectChoice::new("TicTacToe")
+                        .decor(TextDecoration::new().fg_color(Color::Red)),
+                )
+                .multiple()
                 .build(),
         }
     }
@@ -110,7 +115,7 @@ impl WelcomeScene {
                             .decor(TextDecoration::new().fg_color(Color::Yellow)),
                     )
                     .add_part(
-                        TextPart::new(&format!("{}", idx))
+                        TextPart::new(&format!("{:?}", idx))
                             .decor(TextDecoration::new().fg_color(Color::Green)),
                     )
                     .build()

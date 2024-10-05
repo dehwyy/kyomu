@@ -46,16 +46,21 @@ pub struct SelectBuilder {
 
     options: Vec<SelectChoice>,
 
-    selected_index: usize,
+    multiple: bool,
+    selected: Vec<usize>,
     selected_decoration: TextDecoration,
 
-    multiple_choice: bool,
+    focused: usize,
+    focused_decoration: TextDecoration,
 }
 
 impl SelectBuilder {
     pub fn new() -> Self {
         Self {
             selected_decoration: TextDecoration::new()
+                .bg_color(Color::Blue)
+                .fg_color(Color::Red),
+            focused_decoration: TextDecoration::new()
                 .bg_color(Color::White)
                 .fg_color(Color::Black),
             ..Default::default()
@@ -77,25 +82,44 @@ impl SelectBuilder {
         self
     }
 
+    pub fn multiple(mut self) -> Self {
+        self.multiple = true;
+        self
+    }
+
+    pub fn default_selected(mut self, selected: Vec<usize>) -> Self {
+        self.selected = selected;
+        self
+    }
+
+    pub fn default_focused(mut self, focused: usize) -> Self {
+        self.focused = focused;
+        self
+    }
+
     pub fn selected_option_decor(mut self, decor: TextDecoration) -> Self {
         self.selected_decoration = decor;
         self
     }
 
-    pub fn default_selected_index(mut self, index: usize) -> Self {
-        self.selected_index = index;
-        self
-    }
-
-    pub fn multiple_choice(mut self, multiple_choice: bool) -> Self {
-        self.multiple_choice = multiple_choice;
+    pub fn focused_option_decor(mut self, decor: TextDecoration) -> Self {
+        self.focused_decoration = decor;
         self
     }
 
     pub fn build(self) -> Select {
+        let selected = match self.multiple {
+            // Multiple. At least 1 element.
+            true => match self.selected.is_empty() {
+                true => vec![self.focused],
+                false => self.selected,
+            },
+            // Single. At most 1 element.
+            false => vec![*self.selected.first().unwrap_or(&self.focused)],
+        };
         Select {
             inner: ComponentInner::default(),
-            c: self,
+            c: Self { selected, ..self },
         }
     }
 }
@@ -116,43 +140,76 @@ impl Component for Select {
 }
 
 #[async_trait::async_trait]
-impl DynamicComponent<(), usize> for Select {
+impl DynamicComponent<(), Vec<usize>> for Select {
     async fn try_render(
         &mut self,
         rx: &mut EventReceiver,
         stdout: &mut Stdout,
-    ) -> ComponentRenderOutput<(), usize> {
+    ) -> ComponentRenderOutput<(), Vec<usize>> {
         let mut b = TextBuilder::new()
             .add_part(TextPart::newln(&self.c.placeholder).decor(self.c.placeholder_decor));
 
         for (i, choice) in self.c.options.iter().enumerate() {
-            let decor = match self.c.selected_index == i {
-                true => self.c.selected_decoration,
-                false => choice.decor,
+            let is_focused = self.c.focused == i;
+            let is_selected = self.c.selected.contains(&i);
+
+            let mut s = String::from(&choice.text);
+            let mut padding = 4u8;
+
+            let decor = if is_focused {
+                s += " <";
+                self.c.focused_decoration
+            } else if is_selected {
+                self.c.selected_decoration
+            } else {
+                choice.decor
             };
 
-            b = b.add_part(
-                TextPart::newln(format!("{tab}{}", choice.text, tab = ansi::TAB)).decor(decor),
-            );
+            if is_selected {
+                s = format!("✅ {s}");
+                padding -= 3;
+
+                if !is_focused {
+                    s = format!("{s}  ");
+                }
+            }
+
+            let padding = (0..padding).map(|_| ' ').collect::<String>();
+
+            b = b.add_part(TextPart::newln(format!("{padding}{s}")).decor(decor));
         }
 
         b.build().render(stdout).await;
 
         while let Ok(ev) = rx.try_recv() {
             if let Event::Key(key) = ev {
-                match key {
+                match key.vim() {
                     Key::Up => {
-                        if self.c.selected_index != 0 {
-                            self.c.selected_index -= 1;
+                        if self.c.focused != 0 {
+                            self.c.focused -= 1;
                         }
                     }
                     Key::Down => {
-                        if self.c.selected_index < self.c.options.len() - 1 {
-                            self.c.selected_index += 1;
+                        if self.c.focused < self.c.options.len() - 1 {
+                            self.c.focused += 1;
+                        }
+                    }
+                    Key::Space => {
+                        if self.c.multiple {
+                            // Is not included -> push
+                            if !self.c.selected.contains(&self.c.focused) {
+                                self.c.selected.push(self.c.focused);
+                            }
+                            // Included -> remove
+                            else {
+                                self.c.selected.retain(|i| *i != self.c.focused);
+                            }
+                        } else {
+                            self.c.selected = vec![self.c.focused];
                         }
                     }
                     Key::Enter(_) => {
-                        return ComponentRenderOutput::Destroyed(self.c.selected_index);
+                        return ComponentRenderOutput::Destroyed(self.c.selected.clone());
                     }
                     _ => {}
                 };
