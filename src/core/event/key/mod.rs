@@ -20,6 +20,7 @@ pub enum Key {
     ShiftTab,
     Delete,
     Esc,
+    Space,
     // F key.
     F(u8),
     // Char.
@@ -59,7 +60,12 @@ impl From<CrosstermKeyEvent> for Key {
             KC::Esc => Self::Esc,
 
             KC::F(n) => Self::F(n),
-            KC::Char(ch) => Self::Char(KeyChar::new(ch, modifiers)),
+            KC::Char(ch) => {
+                if ch == ' ' {
+                    return Self::Space;
+                }
+                Self::Char(KeyChar::new(ch, modifiers))
+            }
 
             _ => Self::Null,
         }
