@@ -4,7 +4,7 @@ use tokio::time::Duration;
 
 use flags::RuntimeFlags;
 
-const DEFAULT_FPS: u8 = 60;
+const DEFAULT_FPS: u8 = 90;
 struct Frame {
     frames_per_second: u8,
     frame_time: Duration,
