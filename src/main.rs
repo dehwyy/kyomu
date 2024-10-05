@@ -4,7 +4,10 @@ mod rt;
 
 use app::scenes;
 use core::event::Event;
+use core::io::out::flags::OutputGroupFlags;
 use core::terminal::Terminal;
+use core::ui::components::text::{TextBuilder, TextPart};
+use core::ui::components::Component;
 use core::ui::Ui;
 use rt::get_rt_config;
 
@@ -34,30 +37,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rt_config = get_rt_config();
 
     tokio::spawn(async move {
-        // @debug variables
-        let mut frames_rendered = 0u32;
-        let start_time = Instant::now();
-
         let rt_config = rt_config.read().await;
         let frame_time = rt_config.get_frame_time();
-        let is_debug = rt_config.get_flags().is_debug();
 
         let mut interval = interval(frame_time);
 
         drop(rt_config);
 
         loop {
-            if is_debug {
-                println!(
-                    "rendering frame {frames_rendered}, time passed {}, sleep time {}",
-                    start_time.elapsed().as_millis(),
-                    frame_time.as_millis()
-                );
-            }
-
             tokio::join!(t.render(), interval.tick());
-
-            frames_rendered += 1
         }
     });
 
