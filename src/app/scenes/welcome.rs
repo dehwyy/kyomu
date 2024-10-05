@@ -4,10 +4,10 @@ use tokio::io::Stdout;
 
 use crate::core::cell::color::Color;
 use crate::core::event::{Event, EventReceiver};
-use crate::core::io::out::flags::OutputFlags;
+use crate::core::io::out::flags::{OutputFlags, OutputGroupFlags};
 use crate::core::io::text_decor::TextDecoration;
 use crate::core::ui::components::text::{Text, TextBuilder, TextPart};
-use crate::core::ui::components::ComponentRenderOutput;
+use crate::core::ui::components::{self, ComponentRenderOutput};
 use crate::core::ui::Scene;
 use crate::core::ui::{
     components::{
@@ -43,6 +43,13 @@ impl WelcomeScene {
     }
 
     async fn render_stage_1(&mut self, stdout: &mut Stdout) {
+        self.components.input.get_size();
+        RenderFlags::new()
+            .clear_screen()
+            .cursor_home()
+            .render(stdout)
+            .await;
+
         match self.components.input.try_render(stdout).await {
             ComponentRenderOutput::Destroyed(input_value) => {
                 self.stage += 1;
@@ -80,9 +87,5 @@ impl Renderable for WelcomeScene {
 
 #[async_trait::async_trait]
 impl Scene for WelcomeScene {
-    async fn prerender_once(&mut self, stdout: &mut Stdout) {
-        (RenderFlags::CURSOR_HOME | RenderFlags::CLEAR_SCREEN)
-            .render(stdout)
-            .await;
-    }
+    async fn prerender_once(&mut self, stdout: &mut Stdout) {}
 }
