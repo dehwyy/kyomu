@@ -7,6 +7,7 @@ use crate::core::{
     event::key::{Key, KeyChar},
     geom::align::Align,
     io::{
+        ansi,
         out::{
             flags::{self, OutputFlags, OutputGroupFlags},
             group::OutputGroup,
@@ -19,7 +20,10 @@ use crate::core::{
 use crate::core::event::{Event, EventReceiver};
 use crate::core::terminal::{Terminal, TerminalSize};
 
-use super::{Component, ComponentInner, ComponentRenderOutput, ComponentSize};
+use super::{
+    text::{TextBuilder, TextPart},
+    Component, ComponentInner, ComponentRenderOutput, ComponentSize,
+};
 
 pub struct InputBuilder {
     placeholder: String,
@@ -106,6 +110,12 @@ impl Input {
     }
 
     async fn destroy(&mut self, stdout: &mut Stdout) -> String {
+        TextBuilder::new()
+            .add_part(TextPart::new(ansi::def::NEW_LINE))
+            .build()
+            .try_render(stdout)
+            .await;
+
         self.value.trim().to_string()
     }
 }
@@ -126,7 +136,7 @@ impl Component<(), String> for Input {
                     Key::Char(c) => {
                         // CTRL + W
                         if c == KeyChar::build('w').ctrl() {
-                            self.value = String::from(" ");
+                            self.value = String::new();
                         } else {
                             self.value.push(c.ch);
                         }
@@ -141,21 +151,24 @@ impl Component<(), String> for Input {
             }
         }
 
-        let mut output_group = Vec::from([
-            Output::from(self.placeholder_decor).value(&self.placeholder),
-            Output::from(self.value_decor).value(&self.value),
-        ]);
+        let mut text_builder = TextBuilder::new()
+            .add_part(TextPart::new(&self.placeholder).decor(self.placeholder_decor));
 
         // TODO: debug mode
         let is_debug = false;
         if is_debug {
             output_group.push(Output::new(self.get_extra_label()));
+            text_builder = text_builder.add_part(
+                TextPart::new(&self.get_extra_label())
+                    .decor(TextDecoration::new().flags(OutputFlags::new().italic())),
+            );
         }
 
-        OutputGroup::new(*OutputGroupFlags::empty().clear_line(), output_group)
-            .write(stdout)
-            .await
-            .unwrap();
+        text_builder
+            .add_part(TextPart::new(&self.value).decor(self.value_decor))
+            .build()
+            .try_render(stdout)
+            .await;
 
         ComponentRenderOutput::Rendered(())
     }
