@@ -4,19 +4,7 @@ macro_rules! ansidef_variable {
     };
 }
 
-macro_rules! ansidef_function {
-    ($fn_name:ident, $var_args_name:ident,  $fn_args:tt, $fn:expr) => {
-        pub fn $fn_name($var_args_name: $fn_args) -> Vec<String> {
-            $fn($var_args_name)
-                .into_iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<_>>()
-        }
-    };
-    ($var:ident,  $fn_args:tt, $fn:expr) => {
-        ansidef_function!($var, args, $fn_args, $fn);
-    };
-}
+ansidef_variable!(ANSI_DELIMITER, ";");
 
 // Global
 ansidef_variable!(RESET, "0");
@@ -28,7 +16,9 @@ ansidef_variable!(CLEAR_SCREEN, "1J");
 ansidef_variable!(CURSOR_HIDE, "?25l");
 ansidef_variable!(CURSOR_SHOW, "?25h");
 ansidef_variable!(CURSOR_HOME, "H");
-ansidef_function!(absolute_move, coords, (u16, u16), |(x, y)| vec!(y, x));
+pub fn absolute_move(coords: (u16, u16)) -> String {
+    format!("{}{ANSI_DELIMITER}{}", coords.1, coords.0)
+}
 
 // Style
 ansidef_variable!(BOLD, "1");
@@ -50,9 +40,12 @@ ansidef_variable!(MAGENTA, "35");
 ansidef_variable!(CYAN, "36");
 ansidef_variable!(WHITE, "37");
 ansidef_variable!(RGB, "38");
-ansidef_function!(rgb, (u8, u8, u8, u8), |(start, r, g, b)| vec!(
-    start, 2, r, g, b
-));
+pub fn rgb(start: u8, r: u8, g: u8, b: u8) -> Vec<String> {
+    vec![start, 2, r, g, b]
+        .into_iter()
+        .map(|v| v.to_string())
+        .collect()
+}
 
 // AnsiEndChar
 ansidef_variable!(END_GRAPHIC, "m");

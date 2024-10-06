@@ -43,7 +43,7 @@ impl RenderFlags {
 #[async_trait::async_trait]
 impl Renderable for RenderFlags {
     async fn render(&mut self, stdout: &mut Stdout) {
-        let (s, _) = AnsiSequence::new(AnsiSequenceType::NotChainable)
+        let s = AnsiSequence::new(AnsiSequenceType::NotChainable)
             .inject(*self)
             .compile();
 

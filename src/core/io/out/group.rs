@@ -14,12 +14,9 @@ impl OutputGroup {
     }
 
     pub async fn write(self, stdout: &mut Stdout) -> Result<(), WriteError> {
-        let (begin, end) = AnsiSequence::new(AnsiSequenceType::NotChainable)
+        let s = AnsiSequence::new(AnsiSequenceType::NotChainable)
             .inject(self.flags)
             .compile();
-        let s = format!("{begin}{end}");
-
-        // println!("{}", s.escape_debug());
 
         stdout.write_all(s.as_bytes()).await?;
 

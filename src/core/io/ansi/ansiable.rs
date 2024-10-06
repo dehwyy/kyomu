@@ -15,7 +15,7 @@ macro_rules! impl_color_ansiable {
                 };
 
                 match self.0 {
-                    Color::Rgb(r, g, b) => ansi::rgb((with_delta(ansi::RGB), r, g, b)),
+                    Color::Rgb(r, g, b) => ansi::rgb(with_delta(ansi::RGB), r, g, b),
                     common_color => {
                         let color = match common_color {
                             Color::White => ansi::WHITE,

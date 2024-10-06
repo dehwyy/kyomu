@@ -33,3 +33,14 @@ macro_rules! escaped {
         escaped!($s, "")
     }};
 }
+
+#[macro_export]
+macro_rules! esc {
+    ($s:expr, $end:expr) => {{
+        format!("\x1b[{}{}", $s, $end)
+    }};
+
+    ($s:expr) => {{
+        esc!($s, "")
+    }};
+}

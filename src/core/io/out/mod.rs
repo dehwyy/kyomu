@@ -11,7 +11,10 @@ use super::{
 };
 use flags::OutputFlags;
 
-use crate::core::cell::color::{BgColor, Color, FgColor};
+use crate::core::{
+    cell::color::{BgColor, Color, FgColor},
+    io::ansi::global::AnsiGlobal,
+};
 
 pub struct Output {
     s: String,
@@ -57,9 +60,10 @@ impl Output {
             .inject_maybe(self.bg_color);
 
         let s = {
-            let (begin, end) = ansi_sequence.compile();
+            let styles = ansi_sequence.compile();
+            let reset = AnsiGlobal::ResetStyle;
 
-            format!("{begin}{}{end}", self.s)
+            format!("{styles}{}{reset}", self.s)
         };
 
         stdout.write_all(s.as_bytes()).await?;

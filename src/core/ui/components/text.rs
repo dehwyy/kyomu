@@ -7,6 +7,7 @@ use crate::core::{
     io::{
         ansi::{
             def as ansi,
+            global::AnsiGlobal,
             sequence::{AnsiSequence, AnsiSequenceType},
         },
         out::{flags::OutputGroupFlags, group::OutputGroup, Output},
@@ -17,27 +18,19 @@ use crate::core::{
 
 use super::{Component, ComponentInner, ComponentRenderOutput, StaticComponent};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TextPart {
     text: String,
     decor: TextDecoration,
-    new_line: bool,
+    ln: bool,
 }
 
 impl TextPart {
-    pub fn new_cursor_movement(coords: TerminalPosition) -> Self {
-        Self {
-            text: Cursor::ansi_compile_move_to(coords),
-            decor: TextDecoration::default(),
-            new_line: false,
-        }
-    }
-
     pub fn new(s: impl AsRef<str>) -> Self {
         Self {
             text: s.as_ref().to_string(),
             decor: TextDecoration::default(),
-            new_line: false,
+            ln: false,
         }
     }
 
@@ -45,7 +38,7 @@ impl TextPart {
         Self {
             text: s.as_ref().to_string(),
             decor: TextDecoration::default(),
-            new_line: true,
+            ln: true,
         }
     }
 
@@ -97,17 +90,21 @@ impl TextBuilder {
 
     pub fn build_with_align(self, (x, y): TerminalPosition) -> Text {
         // move to base position.
-        let mut line = 1u16;
-        let mut parts = vec![TextPart::new_cursor_movement((x, y + line))];
+
+        let mut reset_position_sequence = {
+            let mut line = 1u16;
+            move || {
+                line += 1;
+                TextPart::new(AnsiGlobal::MoveToCell((x, y + line)).compile())
+            }
+        };
+
+        let mut parts = vec![reset_position_sequence()];
 
         for part in self.parts {
-            let reset_cursor_pos = part.new_line;
-            parts.push(part);
+            parts.push(part.clone());
 
-            if reset_cursor_pos {
-                line += 1;
-                parts.push(TextPart::new_cursor_movement((x, y + line)));
-            }
+            part.ln.then(|| parts.push(reset_position_sequence()));
         }
 
         Text {
