@@ -20,6 +20,12 @@ use super::{
     StaticComponent,
 };
 
+macro_rules! build_padding {
+    ($pad:ident) => {{
+        (0..$pad).map(|_| ' ').collect::<String>()
+    }};
+}
+
 pub struct SelectOption {
     pub text: String,
     pub decor: TextDecoration,
@@ -53,9 +59,10 @@ pub struct SelectBuilder {
     selected_prefix: String,
     focused_suffix: String,
     focused_decoration: TextDecoration,
-    lpadding: u8,
+    lpadding: u16,
     // To align text by center
-    align_padding: u8,
+    align_padding: u16,
+    align_center: bool,
 
     // Computed
     longest_s_len: usize,
@@ -82,6 +89,7 @@ impl Default for SelectBuilder {
                 .fg_color(Color::Black),
             lpadding: 4,
             align_padding: 0,
+            align_center: false,
 
             longest_s_len: 0,
         }
@@ -110,6 +118,11 @@ impl SelectBuilder {
 
     pub fn multiple(mut self) -> Self {
         self.multiple = true;
+        self
+    }
+
+    pub fn align_center(mut self) -> Self {
+        self.align_center = true;
         self
     }
 
@@ -165,6 +178,47 @@ pub struct Select {
 }
 
 impl Select {
+    fn calculate_s_inner_padding(&self, s_len: usize) -> (u16, u16) {
+        if !self.c.align_center {
+            return (0, 0);
+        }
+        let delta = (self.c.longest_s_len - s_len) as u16;
+        let lpadding = delta / 2;
+
+        (lpadding, delta - lpadding)
+    }
+
+    fn calculate_outer_padding(
+        &self,
+        s_len: usize,
+        is_focused: bool,
+        is_selected: bool,
+    ) -> (u16, u16) {
+        // by default, align to longest string.
+        let mut align_to = self.c.longest_s_len;
+
+        // if `align_center` -> no `outer` r_align. Only `inner` alignment (to center).
+        if self.c.align_center {
+            align_to = s_len;
+        }
+
+        // `prefix` (len ==1) + `gap between words` (len == 1)
+        const GAP: u16 = 2;
+
+        let mut lpadding = self.c.lpadding;
+        let mut rpadding = (align_to - s_len) as u16 + GAP;
+
+        if is_selected {
+            lpadding = lpadding.saturating_sub(GAP);
+        }
+
+        if is_focused {
+            rpadding = rpadding.saturating_sub(GAP);
+        }
+
+        (lpadding, rpadding)
+    }
+
     fn apply_option_style(
         &self,
         idx: usize,
@@ -180,32 +234,41 @@ impl Select {
             _ => option.decor,
         };
 
-        const GAP: u8 = 2;
-
-        let mut lpadding = self.c.lpadding;
-        let mut align_padding = self.c.longest_s_len - option.text.len() + GAP as usize;
+        // const GAP: u16 = 2;
+        // let mut lpadding = self.c.lpadding;
+        // let mut align_padding = (self.c.longest_s_len - option.text.len()) as u16 + GAP;
         let mut prefix = String::new();
         let mut suffix = String::new();
 
         if is_selected {
-            // Add prefix & Align with padding
             prefix = self.c.selected_prefix.clone();
-            lpadding -= GAP;
         }
 
         if is_focused {
             suffix = self.c.focused_suffix.clone();
-            align_padding -= GAP as usize;
         }
 
-        let lpadding_with_space: String = (0..lpadding).map(|_| ' ').collect();
-        let align_padding_with_space: String = (0..align_padding).map(|_| ' ').collect();
+        let (inner_lpadding, inner_rpadding) = self.calculate_s_inner_padding(option.text.len());
+        let (lpadding, rpadding) =
+            self.calculate_outer_padding(option.text.len(), is_focused, is_selected);
 
         builder
-            .add_part(TextPart::new(format!("{lpadding_with_space}{prefix} ")))
-            .add_part(TextPart::new(&option.text).decor(decor))
+            .add_part(TextPart::new(format!(
+                "{pad}{prefix} ",
+                pad = build_padding!(lpadding)
+            )))
+            .add_part(
+                TextPart::new(format!(
+                    "{lpad}{s}{rpad}",
+                    s = option.text,
+                    lpad = build_padding!(inner_lpadding),
+                    rpad = build_padding!(inner_rpadding)
+                ))
+                .decor(decor),
+            )
             .add_part(TextPart::newln(format!(
-                " {align_padding_with_space}{suffix}"
+                " {pad}{suffix}",
+                pad = build_padding!(rpadding)
             )))
     }
 }
