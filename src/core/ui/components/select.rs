@@ -1,9 +1,10 @@
-use std::fmt::Display;
+use std::{fmt::Display, process::exit};
 
 use tokio::io::Stdout;
 
 use crate::core::{
     cell::color::Color,
+    cursor::Cursor,
     event::{key::Key, Event, EventReceiver},
     geom::align::Align,
     io::{
@@ -275,11 +276,19 @@ impl Select {
 
 impl Component for Select {
     fn get_size(&self) -> ComponentSize {
-        todo!()
+        let (l1, r1) = self.calculate_outer_padding(self.c.longest_s_len, true, true);
+        let (l2, r2) = self.calculate_s_inner_padding(self.c.longest_s_len);
+
+        let w = l1 + r1 + l2 + r2 + self.c.longest_s_len as u16 + self.c.lpadding;
+        let h = self.c.options.len() as u16 + 1;
+
+        (w, h)
     }
 
-    fn align(&mut self, alignment: Align) {
+    fn align(mut self, alignment: Align) -> Self {
+        self.inner.alignment = alignment;
         self.inner.pos = alignment.get_offset(Terminal::get_size(), self.get_size());
+        self
     }
 }
 
@@ -290,6 +299,16 @@ impl DynamicComponent<(), Vec<usize>> for Select {
         rx: &mut EventReceiver,
         stdout: &mut Stdout,
     ) -> ComponentRenderOutput<(), Vec<usize>> {
+        // Cursor::move_to(self.inner.pos, stdout).await;
+
+        // let mut b = TextBuilder::new();
+        // b.add_part(TextPart::new("debug!"))
+        //     .build()
+        //     .render(stdout)
+        //     .await;
+
+        // exit(1);
+
         let mut b = TextBuilder::new()
             .add_part(TextPart::newln(&self.c.placeholder).decor(self.c.placeholder_decor));
 
@@ -297,7 +316,7 @@ impl DynamicComponent<(), Vec<usize>> for Select {
             b = self.apply_option_style(i, choice, b);
         }
 
-        b.build().render(stdout).await;
+        b.build_with_align(self.inner.pos).render(stdout).await;
 
         while let Ok(ev) = rx.try_recv() {
             if let Event::Key(key) = ev {

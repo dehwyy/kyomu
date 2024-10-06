@@ -3,8 +3,9 @@ use crate::core::{
     ui::components::ComponentSize,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Default, Clone, Copy)]
 pub enum Align {
+    #[default]
     TopLeft,
     TopCenter,
     TopRight,
@@ -35,9 +36,9 @@ impl Align {
             Align::MiddleCenter => ((term_width - width) / 2, (term_height - height) / 2),
             Align::MiddleRight => (term_width - width, (term_height - height) / 2),
 
-            Align::BottomLeft => (0, term_height - height),
-            Align::BottomCenter => ((term_width - width) / 2, term_height - height),
-            Align::BottomRight => (term_width - width, term_height - height),
+            Align::BottomLeft => (0, term_height - height - 1),
+            Align::BottomCenter => ((term_width - width) / 2, term_height - height - 1),
+            Align::BottomRight => (term_width - width, term_height - height - 1),
         }
     }
 }

@@ -40,6 +40,12 @@ macro_rules! impl_color_ansiable {
 impl_color_ansiable!(FgColor, false);
 impl_color_ansiable!(BgColor, true);
 
+impl Ansiable for Vec<String> {
+    fn to_ansi(self) -> Vec<String> {
+        self
+    }
+}
+
 impl Ansiable for OutputFlags {
     fn to_ansi(self) -> Vec<String> {
         let mut v = vec![];

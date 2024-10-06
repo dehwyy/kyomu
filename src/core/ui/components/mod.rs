@@ -13,6 +13,7 @@ pub type ComponentSize = (u16, u16);
 #[derive(Default)]
 pub struct ComponentInner {
     pub pos: Position,
+    pub alignment: Align,
 }
 
 pub enum ComponentRenderOutput<RenderOut, DestroyOut> {
@@ -22,7 +23,7 @@ pub enum ComponentRenderOutput<RenderOut, DestroyOut> {
 
 pub trait Component: Send + Sync {
     fn get_size(&self) -> ComponentSize;
-    fn align(&mut self, alignment: Align);
+    fn align(self, alignment: Align) -> Self;
 }
 
 #[async_trait::async_trait]

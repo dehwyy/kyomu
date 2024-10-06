@@ -8,6 +8,7 @@ use super::Ansiable;
 
 pub enum AnsiSequenceType {
     Graphic,
+    AbsoluteMove,
     NotChainable,
 }
 
@@ -68,6 +69,9 @@ impl AnsiSequence {
                     .join(""),
                 String::new(),
             ),
+            AnsiSequenceType::AbsoluteMove => {
+                (escaped!(self.start, ansi::END_ABSOLUTE_MOVE), String::new())
+            }
         }
     }
 }

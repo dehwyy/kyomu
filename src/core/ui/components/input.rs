@@ -109,8 +109,9 @@ impl Component for Input {
         (w + self.get_extra_label().len() as u16, h)
     }
 
-    fn align(&mut self, alignment: Align) {
+    fn align(mut self, alignment: Align) -> Self {
         self.inner.pos = alignment.get_offset(Terminal::get_size(), self.get_size());
+        self
     }
 }
 
@@ -134,7 +135,7 @@ impl DynamicComponent<(), String> for Input {
 
         text_builder
             .add_part(TextPart::new(&self.value).decor(self.value_decor))
-            .build()
+            .build_with_align(self.inner.pos)
             .render(stdout)
             .await;
 
