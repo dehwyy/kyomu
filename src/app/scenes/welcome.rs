@@ -1,4 +1,4 @@
-use crate::core::ui::components::select::{Select, SelectBuilder, SelectChoice};
+use crate::core::ui::components::select::{Select, SelectBuilder, SelectOption};
 use crate::core::ui::render_flags::RenderFlags;
 use crate::core::ui::render_utils::{clear_screen, disable_cursor, enable_cursor};
 

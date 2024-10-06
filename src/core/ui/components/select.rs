@@ -15,17 +15,17 @@ use crate::core::{
 };
 
 use super::{
-    text::{TextBuilder, TextPart},
+    text::{Text, TextBuilder, TextPart},
     Component, ComponentInner, ComponentRenderOutput, ComponentSize, DynamicComponent,
     StaticComponent,
 };
 
-pub struct SelectChoice {
+pub struct SelectOption {
     pub text: String,
     pub decor: TextDecoration,
 }
 
-impl SelectChoice {
+impl SelectOption {
     pub fn new(text: impl Display) -> Self {
         Self {
             text: text.to_string(),
@@ -39,32 +39,58 @@ impl SelectChoice {
     }
 }
 
-#[derive(Default)]
 pub struct SelectBuilder {
+    // Data
     placeholder: String,
-    placeholder_decor: TextDecoration,
-
-    options: Vec<SelectChoice>,
-
-    multiple: bool,
-    selected: Vec<usize>,
-    selected_decoration: TextDecoration,
-
     focused: usize,
+    selected: Vec<usize>,
+    multiple: bool,
+
+    // Theme
+    options: Vec<SelectOption>,
+    placeholder_decor: TextDecoration,
+    selected_decoration: TextDecoration,
+    selected_prefix: String,
+    focused_suffix: String,
     focused_decoration: TextDecoration,
+    lpadding: u8,
+    // To align text by center
+    align_padding: u8,
+
+    // Computed
+    longest_s_len: usize,
+}
+
+impl Default for SelectBuilder {
+    fn default() -> Self {
+        Self {
+            placeholder: String::new(),
+            focused: 0,
+            selected: vec![],
+            multiple: false,
+
+            options: Vec::new(),
+            placeholder_decor: TextDecoration::default(),
+            selected_prefix: "✅".to_string(),
+            selected_decoration: TextDecoration::new()
+                .bg_color(Color::Blue)
+                .fg_color(Color::Red),
+
+            focused_suffix: "<".to_string(),
+            focused_decoration: TextDecoration::new()
+                .bg_color(Color::White)
+                .fg_color(Color::Black),
+            lpadding: 4,
+            align_padding: 0,
+
+            longest_s_len: 0,
+        }
+    }
 }
 
 impl SelectBuilder {
     pub fn new() -> Self {
-        Self {
-            selected_decoration: TextDecoration::new()
-                .bg_color(Color::Blue)
-                .fg_color(Color::Red),
-            focused_decoration: TextDecoration::new()
-                .bg_color(Color::White)
-                .fg_color(Color::Black),
-            ..Default::default()
-        }
+        Self::default()
     }
 
     pub fn placeholder(mut self, placeholder: impl Display) -> Self {
@@ -77,7 +103,7 @@ impl SelectBuilder {
         self
     }
 
-    pub fn add_option(mut self, option: SelectChoice) -> Self {
+    pub fn add_option(mut self, option: SelectOption) -> Self {
         self.options.push(option);
         self
     }
@@ -119,7 +145,16 @@ impl SelectBuilder {
         };
         Select {
             inner: ComponentInner::default(),
-            c: Self { selected, ..self },
+            c: Self {
+                selected,
+                longest_s_len: self
+                    .options
+                    .iter()
+                    .map(|opt| opt.text.len())
+                    .max()
+                    .unwrap_or(0),
+                ..self
+            },
         }
     }
 }
@@ -127,6 +162,52 @@ impl SelectBuilder {
 pub struct Select {
     inner: ComponentInner,
     c: SelectBuilder,
+}
+
+impl Select {
+    fn apply_option_style(
+        &self,
+        idx: usize,
+        option: &SelectOption,
+        builder: TextBuilder,
+    ) -> TextBuilder {
+        let is_focused = self.c.focused == idx;
+        let is_selected = self.c.selected.contains(&idx);
+
+        let decor = match (is_focused, is_selected) {
+            (true, _) => self.c.focused_decoration,
+            (_, true) => self.c.selected_decoration,
+            _ => option.decor,
+        };
+
+        const GAP: u8 = 2;
+
+        let mut lpadding = self.c.lpadding;
+        let mut align_padding = self.c.longest_s_len - option.text.len() + GAP as usize;
+        let mut prefix = String::new();
+        let mut suffix = String::new();
+
+        if is_selected {
+            // Add prefix & Align with padding
+            prefix = self.c.selected_prefix.clone();
+            lpadding -= GAP;
+        }
+
+        if is_focused {
+            suffix = self.c.focused_suffix.clone();
+            align_padding -= GAP as usize;
+        }
+
+        let lpadding_with_space: String = (0..lpadding).map(|_| ' ').collect();
+        let align_padding_with_space: String = (0..align_padding).map(|_| ' ').collect();
+
+        builder
+            .add_part(TextPart::new(format!("{lpadding_with_space}{prefix} ")))
+            .add_part(TextPart::new(&option.text).decor(decor))
+            .add_part(TextPart::newln(format!(
+                " {align_padding_with_space}{suffix}"
+            )))
+    }
 }
 
 impl Component for Select {
@@ -150,33 +231,7 @@ impl DynamicComponent<(), Vec<usize>> for Select {
             .add_part(TextPart::newln(&self.c.placeholder).decor(self.c.placeholder_decor));
 
         for (i, choice) in self.c.options.iter().enumerate() {
-            let is_focused = self.c.focused == i;
-            let is_selected = self.c.selected.contains(&i);
-
-            let mut s = String::from(&choice.text);
-            let mut padding = 4u8;
-
-            let decor = if is_focused {
-                s += " <";
-                self.c.focused_decoration
-            } else if is_selected {
-                self.c.selected_decoration
-            } else {
-                choice.decor
-            };
-
-            if is_selected {
-                s = format!("✅ {s}");
-                padding -= 3;
-
-                if !is_focused {
-                    s = format!("{s}  ");
-                }
-            }
-
-            let padding = (0..padding).map(|_| ' ').collect::<String>();
-
-            b = b.add_part(TextPart::newln(format!("{padding}{s}")).decor(decor));
+            b = self.apply_option_style(i, choice, b);
         }
 
         b.build().render(stdout).await;
