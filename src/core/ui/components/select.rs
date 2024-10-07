@@ -4,7 +4,6 @@ use tokio::io::Stdout;
 
 use crate::core::{
     cell::color::Color,
-    cursor::Cursor,
     event::{key::Key, Event, EventReceiver},
     geom::align::Align,
     io::{

@@ -1,7 +1,6 @@
 use tokio::io::Stdout;
 
 use crate::core::{
-    cursor::Cursor,
     event::EventReceiver,
     geom::align::Align,
     io::{

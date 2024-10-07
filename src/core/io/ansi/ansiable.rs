@@ -1,6 +1,5 @@
 use crate::core::cell::color::{BgColor, Color, FgColor};
 use crate::core::io::out::flags::{OutputFlags, OutputGroupFlags};
-use crate::core::ui::render_flags::RenderFlags;
 
 use super::def as ansi;
 use super::Ansiable;
@@ -96,30 +95,6 @@ impl Ansiable for OutputGroupFlags {
 
         if self.contains(OutputGroupFlags::NEW_LINE) {
             v.push(ansi::NEW_LINE);
-        }
-
-        v.iter().map(|s| s.to_string()).collect()
-    }
-}
-
-impl Ansiable for RenderFlags {
-    fn to_ansi(self) -> Vec<String> {
-        let mut v = vec![];
-
-        if self.contains(RenderFlags::CLEAR_SCREEN) {
-            v.push(ansi::CLEAR_SCREEN);
-        }
-
-        if self.contains(RenderFlags::CURSOR_HOME) {
-            v.push(ansi::CURSOR_HOME);
-        }
-
-        if self.contains(RenderFlags::CURSOR_HIDE) {
-            v.push(ansi::CURSOR_HIDE);
-        }
-
-        if self.contains(RenderFlags::CURSOR_SHOW) {
-            v.push(ansi::CURSOR_SHOW);
         }
 
         v.iter().map(|s| s.to_string()).collect()
