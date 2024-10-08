@@ -44,3 +44,10 @@ macro_rules! esc {
         esc!($s, "")
     }};
 }
+
+#[macro_export]
+macro_rules! build_padding {
+    ($pad:ident) => {{
+        (0..$pad).map(|_| ' ').collect::<String>()
+    }};
+}
