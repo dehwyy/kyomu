@@ -1,12 +1,13 @@
 use std::fmt::Display;
 
+use futures::stream;
 use tokio::io::{AsyncWriteExt, Stdout};
 
 use crate::{
     core::{
         cell::color::{Color, Rgb},
         event::key::{Key, KeyChar},
-        geom::align::Align,
+        geom::{align::Align, stretch::Stretch},
         io::{
             ansi,
             out::{
@@ -98,7 +99,7 @@ impl Input {
         ((self.placeholder.len() + self.value.len()) as u16, 1)
     }
 
-    async fn destroy(&mut self, stdout: &mut Stdout) -> String {
+    async fn destroy(&mut self) -> String {
         self.value.trim().to_string()
     }
 }
@@ -135,7 +136,8 @@ impl DynamicComponent<(), String> for Input {
 
         text_builder
             .add_part(TextPart::new(&self.value).decor(self.value_decor))
-            .build_with_align(self.inner.pos)
+            .pos(self.inner.pos)
+            .build()
             .render(stdout)
             .await;
 
@@ -159,7 +161,7 @@ impl DynamicComponent<(), String> for Input {
                     }
                     // Enter -> Destroy component
                     Key::Enter(_) => {
-                        return ComponentRenderOutput::Destroyed(self.destroy(stdout).await);
+                        return ComponentRenderOutput::Destroyed(self.destroy().await);
                     }
                     // TODO: handle
                     _ev => {}

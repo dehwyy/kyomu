@@ -1,21 +1,26 @@
+use std::process::exit;
+
 use tokio::io::Stdout;
 
-use crate::core::{
-    event::EventReceiver,
-    geom::align::Align,
-    io::{
-        ansi::{
-            def as ansi,
-            global::AnsiGlobal,
-            sequence::{AnsiSequence, AnsiSequenceType},
+use crate::{
+    build_padding,
+    core::{
+        event::EventReceiver,
+        geom::align::Align,
+        io::{
+            ansi::{
+                def as ansi,
+                global::AnsiGlobal,
+                sequence::{AnsiSequence, AnsiSequenceType},
+            },
+            out::{flags::OutputGroupFlags, group::OutputGroup, Output},
+            text_decor::TextDecoration,
         },
-        out::{flags::OutputGroupFlags, group::OutputGroup, Output},
-        text_decor::TextDecoration,
+        terminal::{Terminal, TerminalPosition},
     },
-    terminal::{Terminal, TerminalPosition},
 };
 
-use super::{Component, ComponentInner, ComponentRenderOutput, StaticComponent};
+use super::{Component, ComponentInner, ComponentRenderOutput, ComponentSize, StaticComponent};
 
 #[derive(Default, Clone)]
 pub struct TextPart {
@@ -53,6 +58,7 @@ impl TextPart {
 pub struct TextBuilder {
     flags: OutputGroupFlags,
     parts: Vec<TextPart>,
+    pos: TerminalPosition,
 }
 
 impl Default for TextBuilder {
@@ -60,6 +66,7 @@ impl Default for TextBuilder {
         Self {
             flags: OutputGroupFlags::empty(),
             parts: Vec::new(),
+            pos: TerminalPosition::default(),
         }
     }
 }
@@ -79,17 +86,15 @@ impl TextBuilder {
         self
     }
 
-    pub fn build(self) -> Text {
-        Text {
-            inner: ComponentInner::default(),
-            flags: self.flags,
-            parts: self.parts,
-        }
+    pub fn pos(mut self, c_pos: TerminalPosition) -> Self {
+        self.pos = c_pos;
+        self
     }
 
-    pub fn build_with_align(self, (x, y): TerminalPosition) -> Text {
-        // move to base position.
+    pub fn build(self) -> Text {
+        let (x, y) = self.pos;
 
+        // move to base position.
         let mut reset_position_sequence = {
             let mut line = 1u16;
             move || {
@@ -100,19 +105,17 @@ impl TextBuilder {
 
         let mut parts = vec![reset_position_sequence()];
 
-        for part in self.parts {
+        for (i, part) in self.parts.iter().enumerate() {
             parts.push(part.clone());
 
-            part.ln.then(|| parts.push(reset_position_sequence()));
+            // TODO: do not call if `next` elem doesn't exist
+            (part.ln && i < self.parts.len() - 1).then(|| parts.push(reset_position_sequence()));
         }
 
         Text {
-            inner: ComponentInner {
-                pos: (x, y),
-                alignment: Align::default(),
-            },
+            inner: ComponentInner::default(),
             flags: self.flags,
-            parts: parts,
+            parts,
         }
     }
 }

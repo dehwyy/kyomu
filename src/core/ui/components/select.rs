@@ -2,16 +2,19 @@ use std::{fmt::Display, process::exit};
 
 use tokio::io::Stdout;
 
-use crate::core::{
-    cell::color::Color,
-    event::{key::Key, Event, EventReceiver},
-    geom::align::Align,
-    io::{
-        ansi::def as ansi,
-        out::{flags::OutputGroupFlags, group::OutputGroup},
-        text_decor::TextDecoration,
+use crate::{
+    build_padding,
+    core::{
+        cell::color::Color,
+        event::{key::Key, Event, EventReceiver},
+        geom::align::Align,
+        io::{
+            ansi::def as ansi,
+            out::{flags::OutputGroupFlags, group::OutputGroup},
+            text_decor::TextDecoration,
+        },
+        terminal::Terminal,
     },
-    terminal::Terminal,
 };
 
 use super::{
@@ -19,12 +22,6 @@ use super::{
     Component, ComponentInner, ComponentRenderOutput, ComponentSize, DynamicComponent,
     StaticComponent,
 };
-
-macro_rules! build_padding {
-    ($pad:ident) => {{
-        (0..$pad).map(|_| ' ').collect::<String>()
-    }};
-}
 
 pub struct SelectOption {
     pub text: String,
@@ -315,7 +312,7 @@ impl DynamicComponent<(), Vec<usize>> for Select {
             b = self.apply_option_style(i, choice, b);
         }
 
-        b.build_with_align(self.inner.pos).render(stdout).await;
+        b.pos(self.inner.pos).build().render(stdout).await;
 
         while let Ok(ev) = rx.try_recv() {
             if let Event::Key(key) = ev {
