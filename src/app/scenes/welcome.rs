@@ -1,6 +1,7 @@
+use crate::core::geom::align::Align;
+use crate::core::geom::stretch::Stretch;
+use crate::core::surface::Surface;
 use crate::core::ui::components::select::{Select, SelectBuilder, SelectOption};
-use crate::core::ui::render_flags::RenderFlags;
-use crate::core::ui::render_utils::{clear_screen, disable_cursor, enable_cursor};
 
 use tokio::io::Stdout;
 use tokio::sync::Mutex;
@@ -10,7 +11,7 @@ use crate::core::event::{Event, EventReceiver};
 use crate::core::io::out::flags::{OutputFlags, OutputGroupFlags};
 use crate::core::io::text_decor::TextDecoration;
 use crate::core::ui::components::text::{Text, TextBuilder, TextPart};
-use crate::core::ui::components::{self, ComponentRenderOutput, DynamicComponent, StaticComponent};
+use crate::core::ui::components::{ComponentRenderOutput, DynamicComponent, StaticComponent};
 use crate::core::ui::Scene;
 use crate::core::ui::{
     components::{
@@ -32,24 +33,27 @@ impl WelcomeComponents {
                 .placeholder("Enter your name:")
                 .placeholder_decor(TextDecoration::new().fg_color(Color::Blue))
                 .default_value(" ")
-                .build(),
+                .build()
+                .align(Align::BottomRight),
             select_mode: SelectBuilder::new()
                 .placeholder("Select mode:")
                 .placeholder_decor(TextDecoration::new().fg_color(Color::Cyan))
                 .add_option(
-                    SelectChoice::new("ImproveIt!")
+                    SelectOption::new("ImproveItYaDaun")
                         .decor(TextDecoration::new().fg_color(Color::Green)),
                 )
                 .add_option(
-                    SelectChoice::new("SnakeGame")
+                    SelectOption::new("SnakeGame")
                         .decor(TextDecoration::new().fg_color(Color::Yellow)),
                 )
                 .add_option(
-                    SelectChoice::new("TicTacToe")
+                    SelectOption::new("TicTacToeIdiVZhopy zhivotnoe")
                         .decor(TextDecoration::new().fg_color(Color::Red)),
                 )
                 .multiple()
-                .build(),
+                .align_center()
+                .build()
+                .align(Align::MiddleCenter),
         }
     }
 }
@@ -70,8 +74,7 @@ impl WelcomeScene {
     }
 
     async fn render_stage_1(&mut self, stdout: &mut Stdout) {
-        // self.components.input.get_size();
-        clear_screen(stdout).await;
+        Surface::clear(stdout).await;
 
         match self.components.input.try_render(&mut self.rx, stdout).await {
             ComponentRenderOutput::Destroyed(input_value) => {
@@ -98,8 +101,8 @@ impl WelcomeScene {
     }
 
     async fn render_stage_2(&mut self, stdout: &mut Stdout) {
-        clear_screen(stdout).await;
-        disable_cursor(stdout).await;
+        Surface::clear(stdout).await;
+        Surface::hide_cursor(stdout).await;
 
         match self
             .components
@@ -127,7 +130,7 @@ impl WelcomeScene {
     }
 
     async fn render_stage_3(&mut self, stdout: &mut Stdout) {
-        clear_screen(stdout).await;
+        // clear_screen(stdout).await;
     }
 }
 
